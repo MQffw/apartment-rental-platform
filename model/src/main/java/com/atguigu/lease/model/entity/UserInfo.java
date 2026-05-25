@@ -25,6 +25,10 @@ public class UserInfo extends BaseEntity {
     @TableField(value = "password",select = false)
     private String password;
 
+    @Schema(description = "邮箱（登录账号）")
+    @TableField(value = "email")
+    private String email;
+
     @Schema(description = "头像url")
     @TableField(value = "avatar_url")
     private String avatarUrl;

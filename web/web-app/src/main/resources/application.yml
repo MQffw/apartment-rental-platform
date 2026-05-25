@@ -4,9 +4,9 @@ server:
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://<hostname>:<port>/<database>?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2b8
-    username: <username>
-    password: <password>
+    url: jdbc:mysql://192.168.10.101:3306/lease?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2b8
+    username: root
+    password: Atguigu.123
     hikari:
       connection-test-query: SELECT 1 # 自动检测连接
       connection-timeout: 60000 #数据库连接超时时间,默认30秒
@@ -17,6 +17,30 @@ spring:
       pool-name: SPHHikariPool # 连接池名称
   jackson:
     time-zone: GMT+8
+  mail:
+    host: smtp.qq.com  # SMTP服务器
+    port: 587           # 端口
+    username: 2690549467@qq.com  # 邮箱地址
+    password: aczdgerivrbadecg  # 授权码，不是登录密码
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  data:
+    redis:
+      host: 192.168.10.101  # Redis服务器地址
+      port: 6379             # Redis端口
+      database: 0            # 数据库索引
+
+verify:
+  code:
+    length: 6        # 验证码长度
+    ttl: 300         # 有效期（秒）
+    resend: 60       # 重发间隔（秒）
 
 #用于打印框架生成的sql语句，便于调试
 mybatis-plus:
@@ -25,3 +49,5 @@ mybatis-plus:
 
 springdoc:
   default-flat-param-object: true
+
+

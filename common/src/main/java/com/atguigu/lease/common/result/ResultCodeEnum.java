@@ -36,6 +36,9 @@ public enum ResultCodeEnum {
     APP_LOGIN_CODE_EXPIRED(505, "验证码已过期"),
     APP_LOGIN_CODE_ERROR(506, "验证码错误"),
     APP_ACCOUNT_DISABLED_ERROR(507, "该用户已被禁用"),
+    APP_LOGIN_EMAIL_EMPTY(508, "邮箱不能为空"),
+    APP_LOGIN_EMAIL_FORMAT_ERROR(509, "邮箱格式不正确"),
+    APP_SEND_EMAIL_TOO_OFTEN(510, "发送过于频繁，请稍后再试"),
 
 
     TOKEN_EXPIRED(601, "token过期"),

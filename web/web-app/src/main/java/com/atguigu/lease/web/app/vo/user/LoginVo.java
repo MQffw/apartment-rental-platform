@@ -5,12 +5,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(description = "APP端登录实体")
+@Schema(description = "登录对象")
 public class LoginVo {
 
-    @Schema(description = "手机号码")
-    private String phone;
+    @Schema(description = "邮箱")
+    private String email;
 
-    @Schema(description = "短信验证码")
+    @Schema(description = "验证码")
     private String code;
 }
