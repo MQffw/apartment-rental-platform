@@ -112,7 +112,11 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public UserInfoVo getUserInfoById(Long id) {
+        // 添加空值判断
         UserInfo userInfo = userInfoService.getById(id);
+        if (userInfo == null) {
+            throw new LeaseException(ResultCodeEnum.ADMIN_ACCOUNT_NOT_EXIST_ERROR);
+        }
         return new UserInfoVo(userInfo.getNickname(), userInfo.getAvatarUrl());
     }
 }
