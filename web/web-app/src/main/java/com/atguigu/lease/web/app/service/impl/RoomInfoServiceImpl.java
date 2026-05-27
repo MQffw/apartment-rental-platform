@@ -1,9 +1,11 @@
 package com.atguigu.lease.web.app.service.impl;
 
+import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
 import com.atguigu.lease.model.entity.*;
 import com.atguigu.lease.model.enums.ItemType;
 import com.atguigu.lease.web.app.mapper.*;
 import com.atguigu.lease.web.app.service.ApartmentInfoService;
+import com.atguigu.lease.web.app.service.BrowsingHistoryService;
 import com.atguigu.lease.web.app.service.RoomInfoService;
 import com.atguigu.lease.web.app.vo.attr.AttrValueVo;
 import com.atguigu.lease.web.app.vo.apartment.ApartmentItemVo;
@@ -60,6 +62,9 @@ public class RoomInfoServiceImpl extends ServiceImpl<RoomInfoMapper, RoomInfo>
     @Autowired
     private ApartmentInfoService apartmentInfoService;
 
+    @Autowired
+    private BrowsingHistoryService browsingHistoryService;
+
     @Override
     public IPage<RoomItemVo> pageItem(Page<RoomItemVo> page, RoomQueryVo queryVo) {
         return roomInfoMapper.pageItem(page, queryVo);
@@ -100,6 +105,9 @@ public class RoomInfoServiceImpl extends ServiceImpl<RoomInfoMapper, RoomInfo>
         roomDetailVo.setPaymentTypeList(paymentTypeList);
         roomDetailVo.setFeeValueVoList(feeValueVoList);
         roomDetailVo.setLeaseTermList(leaseTermList);
+
+        //保存浏览历史，使用异步执行，不耽误获取房间详情返回前端响应
+        browsingHistoryService.saveHistory(LoginUserHolder.getLoginUser().getUserId(),id);
 
         return roomDetailVo;
     }
