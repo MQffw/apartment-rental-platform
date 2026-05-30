@@ -17,9 +17,16 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String token = request.getHeader("access-token");
 
+        // Debug: print token
+        System.out.println("AuthenticationInterceptor - Token: " + token);
+
         Claims claims = JwtUtil.parseToken(token);
         Long userId = claims.get("userId", Long.class);
         String username = claims.get("username", String.class);
+
+        // Debug: print extracted values
+        System.out.println("AuthenticationInterceptor - UserId: " + userId + ", Username: " + username);
+
         LoginUserHolder.setLoginUser(new LoginUser(userId, username));
 
         return true;

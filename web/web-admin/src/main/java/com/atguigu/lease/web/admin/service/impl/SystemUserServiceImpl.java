@@ -39,13 +39,20 @@ public class SystemUserServiceImpl extends ServiceImpl<SystemUserMapper, SystemU
     public SystemUserItemVo getSystemUserById(Long id) {
 
         SystemUser systemUser = systemUserMapper.selectById(id);
-
-        SystemPost systemPost = systemPostMapper.selectById(systemUser.getPostId());
+        if (systemUser == null) {
+            return null;
+        }
 
         SystemUserItemVo systemUserItemVo = new SystemUserItemVo();
+        BeanUtils.copyProperties(systemUser, systemUserItemVo);
 
-        BeanUtils.copyProperties(systemUser,systemUserItemVo);
-        systemUserItemVo.setPostName(systemPost.getName());
+        if (systemUser.getPostId() != null) {
+            SystemPost systemPost = systemPostMapper.selectById(systemUser.getPostId());
+            if (systemPost != null) {
+                systemUserItemVo.setPostName(systemPost.getName());
+            }
+        }
+
         return systemUserItemVo;
     }
 }

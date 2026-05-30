@@ -3,6 +3,7 @@ package com.atguigu.lease.web.admin.controller.lease;
 
 import com.atguigu.lease.common.result.Result;
 import com.atguigu.lease.model.entity.LeaseAgreement;
+import com.atguigu.lease.model.enums.LeaseSourceType;
 import com.atguigu.lease.model.enums.LeaseStatus;
 import com.atguigu.lease.web.admin.service.LeaseAgreementService;
 import com.atguigu.lease.web.admin.vo.agreement.AgreementQueryVo;
@@ -27,6 +28,9 @@ public class LeaseAgreementController {
     @Operation(summary = "保存或修改租约信息")
     @PostMapping("saveOrUpdate")
     public Result saveOrUpdate(@RequestBody LeaseAgreement leaseAgreement) {
+        if (leaseAgreement.getId() == null) {
+            leaseAgreement.setSourceType(LeaseSourceType.NEW);
+        }
         service.saveOrUpdate(leaseAgreement);
         return Result.ok();
     }

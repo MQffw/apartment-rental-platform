@@ -4,4 +4,82 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atguigu.lease.web.app.mapper.ViewAppointmentMapper">
 
+    <resultMap id="AppointmentItemVoMap" type="com.atguigu.lease.web.app.vo.appointment.AppointmentItemVo"
+               autoMapping="true">
+        <id column="id" property="id"/>
+        <collection property="graphVoList" ofType="com.atguigu.lease.web.app.vo.graph.GraphVo" autoMapping="true"/>
+    </resultMap>
+
+    <select id="listItemByUserId" resultMap="AppointmentItemVoMap">
+        select va.id,
+               va.appointment_time,
+               va.appointment_status,
+               ai.name apartment_name,
+               gi.name,
+               gi.url
+        from view_appointment va
+                 left join apartment_info ai on va.apartment_id = ai.id and ai.is_deleted = 0
+                 left join graph_info gi on gi.item_type = 1 and gi.item_id = ai.id and gi.is_deleted = 0
+        where va.is_deleted = 0
+          and va.user_id = #{userId}
+        order by va.create_time desc
+    </select>
+
+    <resultMap id="AppointmentDetailVoMap" type="com.atguigu.lease.web.app.vo.appointment.AppointmentDetailVo"
+               autoMapping="true">
+        <id column="id" property="id"/>
+        <association property="apartmentItemVo" javaType="com.atguigu.lease.web.app.vo.apartment.ApartmentItemVo">
+            <id column="ai_id" property="id"/>
+            <result column="ai_name" property="name"/>
+            <result column="ai_introduction" property="introduction"/>
+            <result column="ai_district_id" property="districtId"/>
+            <result column="ai_district_name" property="districtName"/>
+            <result column="ai_city_id" property="cityId"/>
+            <result column="ai_city_name" property="cityName"/>
+            <result column="ai_province_id" property="provinceId"/>
+            <result column="ai_province_name" property="provinceName"/>
+            <result column="ai_address_detail" property="addressDetail"/>
+            <result column="ai_latitude" property="latitude"/>
+            <result column="ai_longitude" property="longitude"/>
+            <result column="ai_phone" property="phone"/>
+            <result column="ai_is_release" property="isRelease"/>
+            <collection property="labelInfoList" ofType="com.atguigu.lease.model.entity.LabelInfo">
+                <id column="label_id" property="id"/>
+                <result column="label_name" property="name"/>
+                <result column="label_type" property="type"/>
+            </collection>
+            <collection property="graphVoList" ofType="com.atguigu.lease.web.app.vo.graph.GraphVo" autoMapping="true"/>
+        </association>
+    </resultMap>
+
+    <select id="getDetailById" resultMap="AppointmentDetailVoMap">
+        select va.*,
+               ai.id                as ai_id,
+               ai.name              as ai_name,
+               ai.introduction      as ai_introduction,
+               ai.district_id       as ai_district_id,
+               ai.district_name     as ai_district_name,
+               ai.city_id           as ai_city_id,
+               ai.city_name         as ai_city_name,
+               ai.province_id       as ai_province_id,
+               ai.province_name     as ai_province_name,
+               ai.address_detail    as ai_address_detail,
+               ai.latitude          as ai_latitude,
+               ai.longitude         as ai_longitude,
+               ai.phone             as ai_phone,
+               ai.is_release        as ai_is_release,
+               li.id                as label_id,
+               li.name              as label_name,
+               li.type              as label_type,
+               gi.name,
+               gi.url
+        from view_appointment va
+                 left join apartment_info ai on va.apartment_id = ai.id and ai.is_deleted = 0
+                 left join apartment_label al on al.apartment_id = ai.id and al.is_deleted = 0
+                 left join label_info li on li.id = al.label_id and li.is_deleted = 0
+                 left join graph_info gi on gi.item_type = 1 and gi.item_id = ai.id and gi.is_deleted = 0
+        where va.is_deleted = 0
+          and va.id = #{id}
+          and va.user_id = #{userId}
+    </select>
 </mapper>

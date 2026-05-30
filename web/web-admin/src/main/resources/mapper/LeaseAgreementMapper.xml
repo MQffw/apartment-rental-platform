@@ -24,6 +24,7 @@
     <select id="pageAgreementByQuery" resultMap="agreementVoMap">
         select la.id,
         la.phone,
+        la.email,
         la.name,
         la.identification_number,
         la.lease_start_date,
@@ -84,6 +85,9 @@
             </if>
             <if test="queryVo.phone != null and queryVo.phone != ''">
                 and la.phone like concat('%',#{queryVo.phone},'%')
+            </if>
+            <if test="queryVo.email != null and queryVo.email != ''">
+                and la.email like concat('%',#{queryVo.email},'%')
             </if>
         </where>
     </select>

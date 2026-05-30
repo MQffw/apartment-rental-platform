@@ -5,6 +5,7 @@ import com.atguigu.lease.web.admin.mapper.*;
 import com.atguigu.lease.web.admin.service.LeaseAgreementService;
 import com.atguigu.lease.web.admin.vo.agreement.AgreementQueryVo;
 import com.atguigu.lease.web.admin.vo.agreement.AgreementVo;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
@@ -34,6 +35,9 @@ public class LeaseAgreementServiceImpl extends ServiceImpl<LeaseAgreementMapper,
 
     @Autowired
     private LeaseTermMapper leaseTermMapper;
+
+    @Autowired
+    private UserInfoMapper userInfoMapper;
 
     public LeaseAgreementServiceImpl(LeaseAgreementMapper leaseAgreementMapper) {
         this.leaseAgreementMapper = leaseAgreementMapper;
@@ -70,6 +74,11 @@ public class LeaseAgreementServiceImpl extends ServiceImpl<LeaseAgreementMapper,
     @Override
     public IPage<AgreementVo> pageAgreementByQuery(IPage<AgreementVo> page, AgreementQueryVo queryVo) {
         return leaseAgreementMapper.pageAgreementByQuery(page, queryVo);
+    }
+
+    @Override
+    public boolean saveOrUpdate(LeaseAgreement leaseAgreement) {
+        return super.saveOrUpdate(leaseAgreement);
     }
 }
 

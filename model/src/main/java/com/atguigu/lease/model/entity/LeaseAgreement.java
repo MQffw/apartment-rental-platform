@@ -18,9 +18,9 @@ public class LeaseAgreement extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "承租人手机号码")
-    @TableField(value = "phone")
-    private String phone;
+    @Schema(description = "承租人邮箱")
+    @TableField(value = "email")
+    private String email;
 
     @Schema(description = "承租人姓名")
     @TableField(value = "name")
@@ -75,5 +75,4 @@ public class LeaseAgreement extends BaseEntity {
     @Schema(description = "备注信息")
     @TableField(value = "additional_info")
     private String additionalInfo;
-
 }

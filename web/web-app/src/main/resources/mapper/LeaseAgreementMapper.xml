@@ -4,4 +4,52 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atguigu.lease.web.app.mapper.LeaseAgreementMapper">
 
+    <resultMap id="AgreementItemVoMap" type="com.atguigu.lease.web.app.vo.agreement.AgreementItemVo" autoMapping="true">
+        <id property="id" column="id"/>
+        <collection property="roomGraphVoList" ofType="com.atguigu.lease.web.app.vo.graph.GraphVo" autoMapping="true"/>
+    </resultMap>
+
+    <!-- 通过邮箱查询租约列表 -->
+    <select id="listItemByEmail" resultMap="AgreementItemVoMap">
+        select la.id,
+               la.lease_start_date,
+               la.lease_end_date,
+               la.rent,
+               la.payment_type_id,
+               la.status lease_status,
+               la.source_type,
+               ai.name apartment_name,
+               ri.room_number,
+               gi.name,
+               gi.url
+        from lease_agreement la
+                 left join apartment_info ai on la.apartment_id = ai.id and ai.is_deleted = 0
+                 left join room_info ri on la.room_id = ri.id and ri.is_deleted = 0
+                 left join graph_info gi on gi.item_type = 2 and gi.item_id = ri.id and gi.is_deleted = 0
+                 inner join user_info ui on la.email = ui.email and ui.is_deleted = 0
+        where la.is_deleted = 0
+          and ui.email = #{email}
+    </select>
+
+    <!-- 根据id查询租约详细信息 -->
+    <select id="getDetailById" resultMap="AgreementItemVoMap">
+        select la.*,
+               ai.name apartment_name,
+               ri.room_number,
+               pt.name payment_type_name
+        from lease_agreement la
+                 left join apartment_info ai on la.apartment_id = ai.id and ai.is_deleted = 0
+                 left join room_info ri on la.room_id = ri.id and ri.is_deleted = 0
+                 left join payment_type pt on la.payment_type_id = pt.id and pt.is_deleted = 0
+        where la.is_deleted = 0
+          and la.id = #{id}
+    </select>
+
+    <!-- 根据id更新租约状态 -->
+    <update id="updateStatusById">
+        update lease_agreement
+        set status = #{leaseStatus}
+        where id = #{id}
+          and is_deleted = 0
+    </update>
 </mapper>

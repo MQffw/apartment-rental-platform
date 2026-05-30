@@ -9,7 +9,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 public class JwtUtil {
-    private static long tokenExpiration = 60 * 60 * 1000L;
+    private static long tokenExpiration = 24 * 60 * 60 * 1000L;
     private static SecretKey tokenSignKey = Keys.hmacShaKeyFor("M0PKKI6pYGVWWfDZw90a0lTpGYX1d4AQ".getBytes());
 
     public static String createToken(Long userId, String username) {

@@ -1,6 +1,7 @@
 package com.atguigu.lease.web.admin.vo.system.user;
 
 import com.atguigu.lease.model.entity.SystemUser;
+import com.atguigu.lease.model.enums.SystemUserType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -14,4 +15,12 @@ public class SystemUserItemVo extends SystemUser {
     @TableField(value = "post_name")
     private String postName;
 
+    @Schema(description = "用户类型名称")
+    @TableField(exist = false)
+    private String typeName;
+
+    public String getTypeName() {
+        SystemUserType type = getType();
+        return type != null ? type.getName() : null;
+    }
 }

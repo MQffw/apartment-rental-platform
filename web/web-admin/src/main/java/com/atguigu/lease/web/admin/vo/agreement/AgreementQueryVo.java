@@ -28,4 +28,7 @@ public class AgreementQueryVo {
     @Schema(description = "用户手机号码")
     private String phone;
 
+    @Schema(description = "用户邮箱")
+    private String email;
+
 }
