@@ -213,12 +213,3 @@ lease/                           ← 根模块（统一依赖管理）
 ## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request！
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 📞 联系方式
-
-- 项目维护者：[Your Name](mailto:your.email@example.com)
-- 项目链接：[https://github.com/yourusername/lease-management-system](https://github.com/yourusername/lease-management-system)
