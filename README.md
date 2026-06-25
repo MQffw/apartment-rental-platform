@@ -1,4 +1,4 @@
-# 🏠 房屋租赁管理系统 (Lease Management System)
+# 🏠 栖巢长租公寓管理系统 (Apartment Management System)
 
 基于 Spring Boot 3 的房屋租赁管理平台，提供后台管理端和用户移动端双端服务。
 
