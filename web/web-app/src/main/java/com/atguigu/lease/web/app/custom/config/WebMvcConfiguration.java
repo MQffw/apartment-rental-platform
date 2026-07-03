@@ -23,6 +23,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(this.authenticationInterceptor)
                 .addPathPatterns("/app/agreement/**", "/app/appointment/**", "/app/history/**",
                         "/app/notification/**", "/app/user/**", "/app/paymentRecord/**",
+                        "/app/post/**", "/app/repair/**",
                         "/app/setPassword", "/app/hasPassword", "/app/info");
     }
 }

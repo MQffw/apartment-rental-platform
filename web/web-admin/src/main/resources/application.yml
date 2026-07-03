@@ -23,6 +23,13 @@ spring:
       host: 192.168.10.101
       port: 6379
       database: 0
+
+  rabbitmq:
+    host: 192.168.10.101
+    port: 5672
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASS:admin123}
+    virtual-host: /
 #用于打印框架生成的sql语句，便于调试
 mybatis-plus:
   configuration:

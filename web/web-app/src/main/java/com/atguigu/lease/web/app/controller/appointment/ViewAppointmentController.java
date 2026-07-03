@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.atguigu.lease.web.app.mq.NotificationMessageProducer;
 import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "看房预约信息")
@@ -26,6 +27,9 @@ public class ViewAppointmentController {
 
     @Autowired
     private ViewAppointmentService service;
+
+    @Autowired
+    private NotificationMessageProducer notificationProducer;
 
     private LoginUser getCurrentUser() {
         LoginUser loginUser = LoginUserHolder.getLoginUser();
@@ -41,6 +45,14 @@ public class ViewAppointmentController {
         LoginUser loginUser = getCurrentUser();
         viewAppointment.setUserId(loginUser.getUserId());
         service.saveOrUpdate(viewAppointment);
+        try {
+            notificationProducer.sendNotification(loginUser.getUserId(),
+                "预约看房已提交",
+                "您的看房预约已提交，请等待确认",
+                3, viewAppointment.getId());
+        } catch (Exception e) {
+            log.warn("发送预约通知失败: {}", e.getMessage());
+        }
         return Result.ok();
     }
 

@@ -20,6 +20,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.atguigu.lease.web.app.mq.NotificationMessageProducer;
+import com.atguigu.lease.model.entity.UserInfo;
+import com.atguigu.lease.web.app.mapper.UserInfoMapper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -46,6 +49,9 @@ public class LeaseAgreementServiceImpl extends ServiceImpl<LeaseAgreementMapper,
 
     @Autowired
     private GraphInfoMapper graphInfoMapper;
+
+    @Autowired
+    private NotificationMessageProducer notificationProducer;
 
     @Autowired
     private PaymentTypeMapper paymentTypeMapper;
@@ -130,6 +136,19 @@ public class LeaseAgreementServiceImpl extends ServiceImpl<LeaseAgreementMapper,
             log.warn("\u79df\u7ea6\u72b6\u6001\u5e76\u53d1\u4fee\u6539\u68c0\u6d4b: id={}, \u671f\u671b\u72b6\u6001={}, \u76ee\u6807\u72b6\u6001={}",
                     agreementId, currentStatus, targetStatus);
             throw new LeaseException(ResultCodeEnum.DATA_ERROR, "\u79df\u7ea6\u72b6\u6001\u5df2\u53d8\u66f4\uff0c\u8bf7\u5237\u65b0\u540e\u91cd\u8bd5");
+        }
+        // 发送通知给租约用户
+        try {
+            UserInfo user = userInfoMapper.selectOne(
+                new LambdaQueryWrapper<UserInfo>().eq(UserInfo::getEmail, agreement.getEmail()));
+            if (user != null) {
+                notificationProducer.sendNotification(user.getId(),
+                    "租约状态变更",
+                    "您的租约状态已变更为：" + targetStatus.getName(),
+                    4, agreementId);
+            }
+        } catch (Exception e) {
+            log.warn("发送租约状态变更通知失败: {}", e.getMessage());
         }
     }
 
