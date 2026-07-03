@@ -17,11 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 
 @RestController
 @Tag(name = "后台用户岗位管理")
 @RequestMapping("/admin/system/post")
+@Slf4j
 public class SystemPostController {
 
     @Autowired

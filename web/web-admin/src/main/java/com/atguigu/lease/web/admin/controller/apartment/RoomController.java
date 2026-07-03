@@ -15,14 +15,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "房间信息管理")
 @RestController
 @RequestMapping("/admin/room")
+@Slf4j
 public class RoomController {
 
     @Autowired
@@ -30,7 +33,7 @@ public class RoomController {
 
     @Operation(summary = "保存或更新房间信息")
     @PostMapping("saveOrUpdate")
-    public Result saveOrUpdate(@RequestBody RoomSubmitVo roomSubmitVo) {
+    public Result saveOrUpdate(@Valid @RequestBody RoomSubmitVo roomSubmitVo) {
         service.saveOrUpdateRoom(roomSubmitVo);
         return Result.ok();
     }

@@ -15,11 +15,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Tag(name = "预约看房管理")
 @RequestMapping("/admin/appointment")
 @RestController
+@Slf4j
 public class ViewAppointmentController {
 
     @Autowired

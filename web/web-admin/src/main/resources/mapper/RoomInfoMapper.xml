@@ -43,6 +43,27 @@
         on ri.apartment_id = ai.id
         and ai.is_deleted = 0
         WHERE ri.is_deleted = 0
+            <if test="queryVo.provinceId != null">
+                and ai.province_id = #{queryVo.provinceId}
+            </if>
+            <if test="queryVo.cityId != null">
+                and ai.city_id = #{queryVo.cityId}
+            </if>
+            <if test="queryVo.districtId != null">
+                and ai.district_id = #{queryVo.districtId}
+            </if>
+            <if test="queryVo.apartmentId != null">
+                and ri.apartment_id = #{queryVo.apartmentId}
+            </if>
+    </select>
+
+    <select id="countRoomsByApartment" resultType="java.util.Map">
+        SELECT ai.name, COUNT(ri.id) as totalRooms
+        FROM apartment_info ai
+        LEFT JOIN room_info ri ON ri.apartment_id = ai.id AND ri.is_deleted = 0
+        WHERE ai.is_deleted = 0
+        GROUP BY ai.id, ai.name
+        ORDER BY totalRooms DESC
     </select>
 
 </mapper>

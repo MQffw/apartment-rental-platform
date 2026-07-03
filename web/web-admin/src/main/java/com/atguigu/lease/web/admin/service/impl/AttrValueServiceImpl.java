@@ -5,6 +5,7 @@ import com.atguigu.lease.model.entity.AttrValue;
 import com.atguigu.lease.web.admin.service.AttrValueService;
 import com.atguigu.lease.web.admin.mapper.AttrValueMapper;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
 * @author liubo
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2023-07-24 15:48:00
 */
 @Service
+@Slf4j
 public class AttrValueServiceImpl extends ServiceImpl<AttrValueMapper, AttrValue>
     implements AttrValueService{
 

@@ -6,6 +6,9 @@ import com.atguigu.lease.web.admin.vo.room.RoomQueryVo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
+import java.util.List;
+import java.util.Map;
+
 /**
 * @author liubo
 * @description 针对表【room_info(房间信息表)】的数据库操作Mapper
@@ -15,6 +18,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 public interface RoomInfoMapper extends BaseMapper<RoomInfo> {
 
     IPage<RoomItemVo> pageRoomItemByQuery(IPage<RoomItemVo> page, RoomQueryVo queryVo);
+
+    List<Map<String, Object>> countRoomsByApartment();
 }
 
 

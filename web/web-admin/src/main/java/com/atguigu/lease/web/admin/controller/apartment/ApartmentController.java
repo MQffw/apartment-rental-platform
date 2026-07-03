@@ -15,15 +15,18 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Tag(name = "公寓信息管理")
 @RestController
 @RequestMapping("/admin/apartment")
+@Slf4j
 public class ApartmentController {
 
     @Autowired
@@ -33,7 +36,7 @@ public class ApartmentController {
 
     @Operation(summary = "保存或更新公寓信息")
     @PostMapping("saveOrUpdate")
-    public Result saveOrUpdate(@RequestBody ApartmentSubmitVo apartmentSubmitVo) {
+    public Result saveOrUpdate(@Valid @RequestBody ApartmentSubmitVo apartmentSubmitVo) {
         service.saveOrUpdateApartment(apartmentSubmitVo);
         return Result.ok();
     }
@@ -74,6 +77,7 @@ public class ApartmentController {
     @GetMapping("listInfoByDistrictId")
     public Result<List<ApartmentInfo>> listInfoByDistrictId(@RequestParam Long id) {
         LambdaQueryWrapper<ApartmentInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(ApartmentInfo::getId, ApartmentInfo::getName);
         queryWrapper.eq(ApartmentInfo::getDistrictId, id);
         List<ApartmentInfo> list = service.list(queryWrapper);
         return Result.ok(list);

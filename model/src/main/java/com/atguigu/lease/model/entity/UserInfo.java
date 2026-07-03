@@ -1,6 +1,7 @@
 package com.atguigu.lease.model.entity;
 
 import com.atguigu.lease.model.enums.BaseStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -23,6 +24,7 @@ public class UserInfo extends BaseEntity {
 
     @Schema(description = "密码")
     @TableField(value = "password",select = false)
+    @JsonIgnore
     private String password;
 
     @Schema(description = "邮箱（登录账号）")

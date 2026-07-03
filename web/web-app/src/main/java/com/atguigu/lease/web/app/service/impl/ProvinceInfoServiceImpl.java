@@ -5,6 +5,7 @@ import com.atguigu.lease.model.entity.ProvinceInfo;
 import com.atguigu.lease.web.app.service.ProvinceInfoService;
 import com.atguigu.lease.web.app.mapper.ProvinceInfoMapper;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
 * @author liubo
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2023-07-26 11:12:39
 */
 @Service
+@Slf4j
 public class ProvinceInfoServiceImpl extends ServiceImpl<ProvinceInfoMapper, ProvinceInfo>
     implements ProvinceInfoService{
 

@@ -15,13 +15,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.atguigu.lease.common.utils.PasswordUtil;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Tag(name = "后台用户信息管理")
 @RestController
 @RequestMapping("/admin/system/user")
+@Slf4j
 public class SystemUserController {
 
     @Autowired
@@ -53,7 +55,7 @@ public class SystemUserController {
                 !"undefined".equalsIgnoreCase(password.trim());
         if (needEncrypt) {
             // 有效密码，加密后保存
-            systemUser.setPassword(DigestUtils.md5Hex(password.trim()));
+            systemUser.setPassword(PasswordUtil.encode(password.trim()));
         } else if (systemUser.getId() == null) {
             // 新增用户但没有有效密码
             return Result.fail(ResultCodeEnum.PARAM_ERROR.getCode(), "密码不能为空");

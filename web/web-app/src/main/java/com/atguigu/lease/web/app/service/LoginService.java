@@ -9,5 +9,7 @@ public interface LoginService {
 
     String login(LoginVo loginVo);
 
+    String loginByPassword(LoginVo loginVo);
+
     UserInfoVo getUserInfoById(Long id);
 }

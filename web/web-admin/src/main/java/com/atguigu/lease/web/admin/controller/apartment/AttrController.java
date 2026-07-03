@@ -14,11 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Tag(name = "房间属性管理")
 @RestController
 @RequestMapping("/admin/attr")
+@Slf4j
 public class AttrController {
 
     @Autowired

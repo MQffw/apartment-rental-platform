@@ -67,9 +67,10 @@
                 )
             </if>
         </where>
-        <if test="queryVo.orderType == 'desc' or queryVo.orderType == 'asc'">
-            order by ri.rent ${queryVo.orderType}
-        </if>
+        <choose>
+            <when test="queryVo.orderType == 'desc'">order by ri.rent desc</when>
+            <otherwise>order by ri.rent asc</otherwise>
+        </choose>
     </select>
 
     <select id="selectGraphListByRoomId" resultType="com.atguigu.lease.web.app.vo.graph.GraphVo">

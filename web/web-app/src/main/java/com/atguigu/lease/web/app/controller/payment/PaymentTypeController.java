@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "支付方式接口")
 @RestController
 @RequestMapping("/app/payment")
+@Slf4j
 public class PaymentTypeController {
 
     @Autowired

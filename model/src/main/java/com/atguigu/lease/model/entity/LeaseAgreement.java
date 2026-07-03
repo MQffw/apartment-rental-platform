@@ -26,6 +26,10 @@ public class LeaseAgreement extends BaseEntity {
     @TableField(value = "name")
     private String name;
 
+    @Schema(description = "承租人手机号码")
+    @TableField(value = "phone")
+    private String phone;
+
     @Schema(description = "承租人身份证号码")
     @TableField(value = "identification_number")
     private String identificationNumber;
@@ -75,4 +79,8 @@ public class LeaseAgreement extends BaseEntity {
     @Schema(description = "备注信息")
     @TableField(value = "additional_info")
     private String additionalInfo;
+
+    @Schema(description = "续签来源租约ID")
+    @TableField(value = "previous_agreement_id")
+    private Long previousAgreementId;
 }

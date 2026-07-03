@@ -6,7 +6,7 @@ spring:
     type: com.zaxxer.hikari.HikariDataSource
     url: jdbc:mysql://192.168.10.101:3306/lease?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2b8
     username: root
-    password: Atguigu.123
+    password: ${DB_PASSWORD:Atguigu.123}
     hikari:
       connection-test-query: SELECT 1 # 自动检测连接
       connection-timeout: 60000 #数据库连接超时时间,默认30秒
@@ -21,7 +21,7 @@ spring:
     host: smtp.qq.com  # SMTP服务器
     port: 587           # 端口
     username: 2690549467@qq.com  # 邮箱地址
-    password: aczdgerivrbadecg  # 授权码，不是登录密码
+    password: ${MAIL_PASSWORD:aczdgerivrbadecg}  # 授权码，不是登录密码
     protocol: smtp
     properties:
       mail:

@@ -8,18 +8,19 @@ import com.atguigu.lease.model.enums.LeaseStatus;
 import com.atguigu.lease.web.admin.service.LeaseAgreementService;
 import com.atguigu.lease.web.admin.vo.agreement.AgreementQueryVo;
 import com.atguigu.lease.web.admin.vo.agreement.AgreementVo;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Tag(name = "租约管理")
 @RestController
 @RequestMapping("/admin/agreement")
+@Slf4j
 public class LeaseAgreementController {
 
     @Autowired
@@ -60,10 +61,7 @@ public class LeaseAgreementController {
     @Operation(summary = "根据id更新租约状态")
     @PostMapping("updateStatusById")
     public Result updateStatusById(@RequestParam Long id, @RequestParam LeaseStatus status) {
-        LambdaUpdateWrapper<LeaseAgreement> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(LeaseAgreement::getId, id);
-        updateWrapper.set(LeaseAgreement::getStatus, status);
-        service.update(updateWrapper);
+        service.updateStatusById(id, status);
         return Result.ok();
     }
 

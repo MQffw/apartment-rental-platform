@@ -13,15 +13,17 @@ import com.atguigu.lease.web.admin.vo.login.LoginVo;
 import com.atguigu.lease.web.admin.vo.system.user.SystemUserInfoVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.wf.captcha.SpecCaptcha;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.atguigu.lease.common.utils.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class LoginServiceImpl implements LoginService {
 
     @Autowired
@@ -44,6 +46,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public String login(LoginVo loginVo) {
+        log.info("管理员尝试登录, username={}", loginVo.getUsername());
         if (loginVo.getCaptchaCode()==null){
             throw new LeaseException(ResultCodeEnum.ADMIN_CAPTCHA_CODE_NOT_FOUND);
         }
@@ -52,20 +55,26 @@ public class LoginServiceImpl implements LoginService {
             throw new LeaseException(ResultCodeEnum.ADMIN_CAPTCHA_CODE_EXPIRED);
         }
         if (!code.equals(loginVo.getCaptchaCode().toLowerCase())){
+            // 验证码错误后立即删除，防止暴力重试
+            stringRedisTemplate.delete(loginVo.getCaptchaKey());
             throw new LeaseException(ResultCodeEnum.ADMIN_CAPTCHA_CODE_ERROR);
         }
 
         SystemUser systemUser = systemUserMapper.selectOneByUsername(loginVo.getUsername());
 
         if (systemUser==null){
+            log.warn("管理员登录失败, 账号不存在, username={}", loginVo.getUsername());
             throw new LeaseException(ResultCodeEnum.ADMIN_ACCOUNT_NOT_EXIST_ERROR);
         }
         if (systemUser.getStatus()== BaseStatus.DISABLE){
+            log.warn("管理员登录失败, 账号被禁用, username={}", loginVo.getUsername());
             throw new LeaseException(ResultCodeEnum.ADMIN_ACCOUNT_DISABLED_ERROR);
         }
-        if (!systemUser.getPassword().equals(DigestUtils.md5Hex(loginVo.getPassword()))){
+        if (!PasswordUtil.matches(loginVo.getPassword(), systemUser.getPassword())){
+            log.warn("管理员登录失败, 密码错误, username={}", loginVo.getUsername());
             throw new LeaseException(ResultCodeEnum.ADMIN_ACCOUNT_ERROR);
         }
+        log.info("管理员登录成功, userId={}, username={}", systemUser.getId(), systemUser.getUsername());
         return JwtUtil.createToken(systemUser.getId(), systemUser.getUsername());
     }
 

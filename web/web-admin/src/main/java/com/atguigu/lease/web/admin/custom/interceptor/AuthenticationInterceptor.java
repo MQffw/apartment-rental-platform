@@ -20,7 +20,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         Long userId = claims.get("userId", Long.class);
         String username = claims.get("username", String.class);
         LoginUserHolder.setLoginUser(new LoginUser(userId, username));
-
         return true;
     }
 

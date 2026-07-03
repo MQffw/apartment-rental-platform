@@ -10,17 +10,18 @@ import com.atguigu.lease.model.enums.LeaseStatus;
 import com.atguigu.lease.web.app.service.LeaseAgreementService;
 import com.atguigu.lease.web.app.vo.agreement.AgreementDetailVo;
 import com.atguigu.lease.web.app.vo.agreement.AgreementItemVo;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/app/agreement")
 @Tag(name = "租约信息")
+@Slf4j
 public class LeaseAgreementController {
 
     @Autowired
@@ -30,9 +31,7 @@ public class LeaseAgreementController {
     @Operation(summary = "获取个人租约基本信息列表")
     @GetMapping("listItem")
     public Result<List<AgreementItemVo>> listItem() {
-        System.out.println("LeaseAgreementController.listItem - Getting user from LoginUserHolder");
         LoginUser loginUser = LoginUserHolder.getLoginUser();
-        System.out.println("LeaseAgreementController.listItem - LoginUser: " + loginUser);
         if (loginUser == null) {
             throw new LeaseException(ResultCodeEnum.APP_LOGIN_AUTH);
         }
@@ -68,10 +67,13 @@ public class LeaseAgreementController {
         if (loginUser == null) {
             throw new LeaseException(ResultCodeEnum.APP_LOGIN_AUTH);
         }
-        LambdaUpdateWrapper<LeaseAgreement> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(LeaseAgreement::getId, id);
-        updateWrapper.set(LeaseAgreement::getStatus, leaseStatus);
-        service.update(updateWrapper);
+        // 校验租约归属，防止 IDOR 攻击
+        LeaseAgreement agreement = service.getById(id);
+        if (agreement == null || !agreement.getEmail().equals(loginUser.getUsername())) {
+            throw new LeaseException(ResultCodeEnum.ILLEGAL_REQUEST);
+        }
+        // 校验状态转换 + CAS更新（原子操作，防竞态）
+        service.updateStatusById(id, leaseStatus);
         return Result.ok();
     }
 

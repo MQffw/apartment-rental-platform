@@ -5,6 +5,7 @@ import com.atguigu.lease.model.entity.BrowsingHistory;
 import com.atguigu.lease.web.admin.service.BrowsingHistoryService;
 import com.atguigu.lease.web.admin.mapper.BrowsingHistoryMapper;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
 * @author liubo
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2023-07-24 15:48:00
 */
 @Service
+@Slf4j
 public class BrowsingHistoryServiceImpl extends ServiceImpl<BrowsingHistoryMapper, BrowsingHistory>
     implements BrowsingHistoryService{
 

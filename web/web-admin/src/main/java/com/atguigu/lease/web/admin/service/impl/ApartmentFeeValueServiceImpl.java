@@ -5,6 +5,7 @@ import com.atguigu.lease.model.entity.ApartmentFeeValue;
 import com.atguigu.lease.web.admin.service.ApartmentFeeValueService;
 import com.atguigu.lease.web.admin.mapper.ApartmentFeeValueMapper;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
 * @author liubo
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2023-07-24 15:48:00
 */
 @Service
+@Slf4j
 public class ApartmentFeeValueServiceImpl extends ServiceImpl<ApartmentFeeValueMapper, ApartmentFeeValue>
     implements ApartmentFeeValueService{
 

@@ -5,6 +5,7 @@ import com.atguigu.lease.model.entity.GraphInfo;
 import com.atguigu.lease.web.app.service.GraphInfoService;
 import com.atguigu.lease.web.app.mapper.GraphInfoMapper;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
 * @author liubo
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2023-07-26 11:12:39
 */
 @Service
+@Slf4j
 public class GraphInfoServiceImpl extends ServiceImpl<GraphInfoMapper, GraphInfo>
     implements GraphInfoService{
 

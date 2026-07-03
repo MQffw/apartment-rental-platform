@@ -14,10 +14,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "用户信息管理")
 @RestController
 @RequestMapping("/admin/user")
+@Slf4j
 public class UserInfoController {
 
     @Autowired
@@ -41,6 +43,6 @@ public class UserInfoController {
         updateWrapper.eq(UserInfo::getId, id);
         updateWrapper.set(UserInfo::getStatus, status);
         service.update(updateWrapper);
-        return Result.ok(updateWrapper);
+        return Result.ok();
     }
 }

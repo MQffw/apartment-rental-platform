@@ -1,5 +1,7 @@
 package com.atguigu.lease.web.app.service.impl;
 
+import com.atguigu.lease.common.exception.LeaseException;
+import com.atguigu.lease.common.result.ResultCodeEnum;
 import com.atguigu.lease.model.entity.ApartmentInfo;
 import com.atguigu.lease.model.entity.FacilityInfo;
 import com.atguigu.lease.model.entity.LabelInfo;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author liubo
@@ -27,6 +30,7 @@ import java.util.List;
  * @createDate 2023-07-26 11:12:39
  */
 @Service
+@Slf4j
 public class ApartmentInfoServiceImpl extends ServiceImpl<ApartmentInfoMapper, ApartmentInfo>
         implements ApartmentInfoService {
 
@@ -49,6 +53,9 @@ public class ApartmentInfoServiceImpl extends ServiceImpl<ApartmentInfoMapper, A
     public ApartmentItemVo selectApartmentItemVoById(Long id) {
 
         ApartmentInfo apartmentInfo = apartmentInfoMapper.selectById(id);
+        if (apartmentInfo == null) {
+            throw new LeaseException(ResultCodeEnum.DATA_ERROR, "公寓不存在");
+        }
 
         List<LabelInfo> labelInfoList = labelInfoMapper.selectListByApartmentId(id);
 
@@ -69,6 +76,9 @@ public class ApartmentInfoServiceImpl extends ServiceImpl<ApartmentInfoMapper, A
     public ApartmentDetailVo getApartmentDetailById(Long id) {
         //1.查询公寓信息
         ApartmentInfo apartmentInfo = apartmentInfoMapper.selectById(id);
+        if (apartmentInfo == null) {
+            throw new LeaseException(ResultCodeEnum.DATA_ERROR, "公寓不存在");
+        }
         //2.查询图片信息
         List<GraphVo> graphVoList = graphInfoMapper.selectListByItemTypeAndId(ItemType.APARTMENT, id);
         //3.查询标签信息

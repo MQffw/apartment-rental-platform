@@ -16,11 +16,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Tag(name = "文件管理")
 @RequestMapping("/admin/file")
 @RestController
+@Slf4j
 public class FileUploadController {
 
     @Autowired

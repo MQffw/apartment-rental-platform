@@ -91,4 +91,67 @@
             </if>
         </where>
     </select>
+
+    <select id="selectAgreementDetailById" resultMap="agreementVoMap">
+        select la.id,
+               la.phone,
+               la.email,
+               la.name,
+               la.identification_number,
+               la.lease_start_date,
+               la.lease_end_date,
+               la.rent,
+               la.deposit,
+               la.status,
+               la.source_type,
+               la.additional_info,
+               ai.id   apartment_id,
+               ai.name apartment_name,
+               ai.district_id,
+               ai.district_name,
+               ai.city_id,
+               ai.city_name,
+               ai.province_id,
+               ai.province_name,
+               ri.id   room_id,
+               ri.room_number,
+               pt.id   payment_type_id,
+               pt.name payment_type_name,
+               pt.pay_month_count,
+               lt.id   lease_term_id,
+               lt.month_count,
+               lt.unit
+        from lease_agreement la
+                 left join apartment_info ai on la.apartment_id = ai.id and ai.is_deleted = 0
+                 left join room_info ri on la.room_id = ri.id and ri.is_deleted = 0
+                 left join payment_type pt on la.payment_type_id = pt.id and pt.is_deleted = 0
+                 left join lease_term lt on la.lease_term_id = lt.id and lt.is_deleted = 0
+        where la.id = #{id}
+          and la.is_deleted = 0
+    </select>
+
+    <select id="countLeasesByStatus" resultType="java.util.Map">
+        SELECT
+            IFNULL(SUM(status = 1), 0) AS signingCount,
+            IFNULL(SUM(status = 2), 0) AS signedCount,
+            IFNULL(SUM(status = 3), 0) AS canceledCount,
+            IFNULL(SUM(status = 4), 0) AS expiredCount,
+            IFNULL(SUM(status = 5), 0) AS withdrawingCount,
+            IFNULL(SUM(status = 6), 0) AS withdrawnCount,
+            IFNULL(SUM(status = 7), 0) AS renewingCount
+        FROM lease_agreement
+        WHERE is_deleted = 0
+    </select>
+
+    <select id="countLeasesByMonth" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT(lease_start_date, '%Y-%m') AS month,
+            COUNT(*) AS newCount,
+            SUM(status IN (4, 6)) AS endedCount
+        FROM lease_agreement
+        WHERE is_deleted = 0
+          AND lease_start_date >= DATE_SUB(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 11 MONTH)
+        GROUP BY month
+        ORDER BY month ASC
+    </select>
 </mapper>

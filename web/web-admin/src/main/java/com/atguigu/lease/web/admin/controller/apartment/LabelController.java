@@ -12,10 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "标签管理")
 @RestController
 @RequestMapping("/admin/label")
+@Slf4j
 public class LabelController {
 
     @Autowired

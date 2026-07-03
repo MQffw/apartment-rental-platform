@@ -20,7 +20,7 @@
         ai.phone,
         ai.is_release,
         ifnull(tc.cnt,0) total_room_count,
-        ifnull(tc.cnt,0) - ifnull(cc.cnt,0) free_room_count
+        greatest(ifnull(tc.cnt,0) - ifnull(cc.cnt,0), 0) free_room_count
         from (select id,
         name,
         introduction,
@@ -58,12 +58,13 @@
         group by apartment_id) tc
         on ai.id = tc.apartment_id
         left join
-        (select apartment_id,
+        (select la.apartment_id,
         count(*) cnt
-        from lease_agreement
-        where is_deleted = 0
-        and status in (2, 5)
-        group by apartment_id) cc
+        from lease_agreement la
+        inner join room_info ri on la.room_id = ri.id and ri.is_deleted = 0 and ri.is_release = 1
+        where la.is_deleted = 0
+        and la.status in (2, 5)
+        group by la.apartment_id) cc
         on ai.id = cc.apartment_id
 
     </select>

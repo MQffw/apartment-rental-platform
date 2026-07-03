@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
 * @author liubo
@@ -16,6 +17,7 @@ import java.util.List;
 * @createDate 2023-07-24 15:48:00
 */
 @Service
+@Slf4j
 public class AttrKeyServiceImpl extends ServiceImpl<AttrKeyMapper, AttrKey>
     implements AttrKeyService{
 

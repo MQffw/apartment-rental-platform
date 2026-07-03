@@ -1,6 +1,7 @@
 package com.atguigu.lease.web.app.service.impl;
 
 import com.atguigu.lease.common.constant.RedisConstant;
+import com.atguigu.lease.web.app.custom.LoginUser;
 import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
 import com.atguigu.lease.model.entity.*;
 import com.atguigu.lease.model.enums.ItemType;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author liubo
@@ -114,11 +116,14 @@ public class RoomInfoServiceImpl extends ServiceImpl<RoomInfoMapper, RoomInfo>
             roomDetailVo.setFeeValueVoList(feeValueVoList);
             roomDetailVo.setLeaseTermList(leaseTermList);
 
-            redisTemplate.opsForValue().set(key, roomDetailVo);
+            redisTemplate.opsForValue().set(key, roomDetailVo, RedisConstant.APP_ROOM_CACHE_TTL_SEC, TimeUnit.SECONDS);
         }
 
-        //10.保存浏览历史
-        browsingHistoryService.saveHistory(LoginUserHolder.getLoginUser().getUserId(), id);
+        //10.保存浏览历史（仅已登录用户）
+        LoginUser loginUser = LoginUserHolder.getLoginUser();
+        if (loginUser != null) {
+            browsingHistoryService.saveHistory(loginUser.getUserId(), id);
+        }
 
         return roomDetailVo;
     }

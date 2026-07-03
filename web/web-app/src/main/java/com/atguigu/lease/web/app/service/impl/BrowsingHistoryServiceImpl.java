@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author liubo
@@ -20,6 +21,7 @@ import java.util.Date;
  * @createDate 2023-07-26 11:12:39
  */
 @Service
+@Slf4j
 public class BrowsingHistoryServiceImpl extends ServiceImpl<BrowsingHistoryMapper, BrowsingHistory>
         implements BrowsingHistoryService {
 

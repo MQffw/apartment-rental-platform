@@ -15,4 +15,9 @@ public class UserInfoVo {
     @Schema(description = "用户头像")
     private String avatarUrl;
 
+    @Schema(description = "邮箱")
+    private String email;
+
+    @Schema(description = "手机号")
+    private String phone;
 }

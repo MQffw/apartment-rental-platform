@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "房间信息")
 @RestController
 @RequestMapping("/app/room")
+@Slf4j
 public class RoomController {
 
     @Autowired

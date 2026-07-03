@@ -1,7 +1,7 @@
 package com.atguigu.lease.common.login;
 
 public class LoginUserHolder {
-    public static ThreadLocal<LoginUser> threadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<LoginUser> threadLocal = new ThreadLocal<>();
 
     public static void setLoginUser(LoginUser loginUser) {
         threadLocal.set(loginUser);

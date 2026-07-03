@@ -19,4 +19,5 @@ public interface LeaseAgreementService extends IService<LeaseAgreement> {
     List<AgreementItemVo> listItemByEmail(String email);
     AgreementDetailVo getDetailById(Long id, Long userId);
     boolean saveOrUpdate(LeaseAgreement leaseAgreement);
+    void updateStatusById(Long agreementId, LeaseStatus targetStatus);
 }

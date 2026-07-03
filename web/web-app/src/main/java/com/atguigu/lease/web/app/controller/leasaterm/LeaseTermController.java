@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/app/term/")
 @Tag(name = "租期信息")
+@Slf4j
 public class LeaseTermController {
 
     @Autowired

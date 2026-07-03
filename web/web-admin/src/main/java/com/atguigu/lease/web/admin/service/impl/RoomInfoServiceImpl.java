@@ -1,6 +1,8 @@
 package com.atguigu.lease.web.admin.service.impl;
 
 import com.atguigu.lease.common.constant.RedisConstant;
+import com.atguigu.lease.common.exception.LeaseException;
+import com.atguigu.lease.common.result.ResultCodeEnum;
 import com.atguigu.lease.model.entity.*;
 import com.atguigu.lease.model.enums.ItemType;
 import com.atguigu.lease.web.admin.mapper.*;
@@ -19,9 +21,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author liubo
@@ -29,6 +34,7 @@ import java.util.List;
  * @createDate 2023-07-24 15:48:00
  */
 @Service
+@Slf4j
 public class RoomInfoServiceImpl extends ServiceImpl<RoomInfoMapper, RoomInfo>
         implements RoomInfoService {
 
@@ -78,6 +84,7 @@ public class RoomInfoServiceImpl extends ServiceImpl<RoomInfoMapper, RoomInfo>
     private RedisTemplate<String, Object> redisTemplate;
 
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveOrUpdateRoom(RoomSubmitVo roomSubmitVo) {
         boolean isUpdate = roomSubmitVo.getId() != null;
@@ -196,6 +203,9 @@ public class RoomInfoServiceImpl extends ServiceImpl<RoomInfoMapper, RoomInfo>
 
         //1.查询RoomInfo
         RoomInfo roomInfo = roomInfoMapper.selectById(id);
+        if (roomInfo == null) {
+            throw new LeaseException(ResultCodeEnum.DATA_ERROR, "房间不存在");
+        }
 
         //2.查询所属公寓信息
         ApartmentInfo apartmentInfo = apartmentInfoMapper.selectById(roomInfo.getApartmentId());
@@ -233,6 +243,7 @@ public class RoomInfoServiceImpl extends ServiceImpl<RoomInfoMapper, RoomInfo>
         return adminRoomDetailVo;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void removeRoomById(Long id) {
         //1.删除RoomInfo
@@ -271,6 +282,11 @@ public class RoomInfoServiceImpl extends ServiceImpl<RoomInfoMapper, RoomInfo>
 
         //8.删除缓存
         redisTemplate.delete(RedisConstant.APP_ROOM_PREFIX + id);
+    }
+
+    @Override
+    public List<Map<String, Object>> countRoomsByApartment() {
+        return roomInfoMapper.countRoomsByApartment();
     }
 }
 

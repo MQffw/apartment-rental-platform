@@ -1,11 +1,15 @@
 package com.atguigu.lease.web.admin.service;
 
 import com.atguigu.lease.model.entity.LeaseAgreement;
+import com.atguigu.lease.model.enums.LeaseStatus;
 import com.atguigu.lease.web.admin.vo.agreement.AgreementQueryVo;
 import com.atguigu.lease.web.admin.vo.agreement.AgreementVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author liubo
@@ -17,4 +21,10 @@ public interface LeaseAgreementService extends IService<LeaseAgreement> {
     AgreementVo getAgreementById(Long id);
 
     IPage<AgreementVo> pageAgreementByQuery(IPage<AgreementVo> page, AgreementQueryVo queryVo);
+
+    void updateStatusById(Long agreementId, LeaseStatus targetStatus);
+
+    List<Map<String, Object>> countLeasesByStatus();
+
+    List<Map<String, Object>> countLeasesByMonth();
 }

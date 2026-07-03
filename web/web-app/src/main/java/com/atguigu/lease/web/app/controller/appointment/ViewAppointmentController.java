@@ -6,6 +6,7 @@ import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
 import com.atguigu.lease.common.result.Result;
 import com.atguigu.lease.common.result.ResultCodeEnum;
 import com.atguigu.lease.model.entity.ViewAppointment;
+import com.atguigu.lease.model.enums.AppointmentStatus;
 import com.atguigu.lease.web.app.service.ViewAppointmentService;
 import com.atguigu.lease.web.app.vo.appointment.AppointmentDetailVo;
 import com.atguigu.lease.web.app.vo.appointment.AppointmentItemVo;
@@ -15,10 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "看房预约信息")
 @RestController
 @RequestMapping("/app/appointment")
+@Slf4j
 public class ViewAppointmentController {
 
     @Autowired
@@ -61,5 +64,29 @@ public class ViewAppointmentController {
             throw new LeaseException(ResultCodeEnum.DATA_ERROR, "预约记录不存在");
         }
         return Result.ok(appointmentDetailVo);
+    }
+
+    @Operation(summary = "取消预约")
+    @PostMapping("cancel")
+    public Result cancel(@RequestParam Long id) {
+        if (id == null || id <= 0) {
+            throw new LeaseException(ResultCodeEnum.PARAM_ERROR, "预约ID不能为空");
+        }
+        LoginUser loginUser = getCurrentUser();
+        // 校验预约归属
+        ViewAppointment appointment = service.getById(id);
+        if (appointment == null) {
+            throw new LeaseException(ResultCodeEnum.DATA_ERROR, "预约记录不存在");
+        }
+        if (!appointment.getUserId().equals(loginUser.getUserId())) {
+            throw new LeaseException(ResultCodeEnum.ILLEGAL_REQUEST);
+        }
+        // 只有待看房状态可以取消
+        if (appointment.getAppointmentStatus() != AppointmentStatus.WAITING) {
+            throw new LeaseException(ResultCodeEnum.PARAM_ERROR, "只有待看房状态的预约可以取消");
+        }
+        appointment.setAppointmentStatus(AppointmentStatus.CANCELED);
+        service.updateById(appointment);
+        return Result.ok();
     }
 }

@@ -5,6 +5,7 @@ import com.atguigu.lease.model.entity.RoomPaymentType;
 import com.atguigu.lease.web.app.service.RoomPaymentTypeService;
 import com.atguigu.lease.web.app.mapper.RoomPaymentTypeMapper;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 /**
 * @author liubo
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 * @createDate 2023-07-26 11:12:39
 */
 @Service
+@Slf4j
 public class RoomPaymentTypeServiceImpl extends ServiceImpl<RoomPaymentTypeMapper, RoomPaymentType>
     implements RoomPaymentTypeService{
 

@@ -19,10 +19,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author liubo
@@ -30,6 +32,7 @@ import java.util.List;
  * @createDate 2023-07-24 15:48:00
  */
 @Service
+@Slf4j
 public class ApartmentInfoServiceImpl extends ServiceImpl<ApartmentInfoMapper, ApartmentInfo>
         implements ApartmentInfoService {
 
@@ -64,6 +67,7 @@ public class ApartmentInfoServiceImpl extends ServiceImpl<ApartmentInfoMapper, A
     private ApartmentFeeValueService apartmentFeeValueService;
 
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveOrUpdateApartment(ApartmentSubmitVo apartmentSubmitVo) {
         boolean isupdate = apartmentSubmitVo.getId()!=null;
@@ -147,6 +151,9 @@ public class ApartmentInfoServiceImpl extends ServiceImpl<ApartmentInfoMapper, A
     public ApartmentDetailVo getDetailById(Long id) {
         //查询公寓信息
         ApartmentInfo apartmentInfo = apartmentInfoMapper.selectById(id);
+        if (apartmentInfo == null) {
+            throw new LeaseException(ResultCodeEnum.DATA_ERROR, "公寓不存在");
+        }
         //查询其他信息
         List<GraphVo> graphVoList = graphInfoMapper.selectListByItemTypeAndId(ItemType.APARTMENT,id);
 
@@ -166,6 +173,7 @@ public class ApartmentInfoServiceImpl extends ServiceImpl<ApartmentInfoMapper, A
         return apartmentDetailVo;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void removeApartmentById(Long id) {
         LambdaQueryWrapper<RoomInfo> roomQueryWrapper = new LambdaQueryWrapper<>();
