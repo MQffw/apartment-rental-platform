@@ -1,6 +1,6 @@
-# 桔巢长租公寓管理系统
+# 栖巢长租公寓管理系统
 
-基于 Spring Boot 3 的长租公寓管理平台，提供后台管理端和用户移动端双端服务。
+基于 Spring Boot 3 的短租公寓管理平台，提供后台管理端和用户移动端双端服务。
 
 ![Java](https://img.shields.io/badge/Java-17-blue)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.0.5-brightgreen)
