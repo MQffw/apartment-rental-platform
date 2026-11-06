@@ -17,6 +17,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("access-token");
         Claims claims = JwtUtil.parseToken(token);
+        // 校验 token 用途：拒绝用户端 token 访问管理端（防跨端越权）
+        JwtUtil.validateScope(claims, JwtUtil.SCOPE_ADMIN);
         Long userId = claims.get("userId", Long.class);
         String username = claims.get("username", String.class);
         LoginUserHolder.setLoginUser(new LoginUser(userId, username));

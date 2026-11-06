@@ -21,6 +21,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -45,6 +46,15 @@ public class PostCommentConsumer {
     public void onMessage(PostCommentMessage msg,
                           Channel channel,
                           @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
+        // 幂等检查：消息重投递时（Redis 键已存在）直接 ack 跳过，防止评论重复入库
+        String dedupeKey = RedisConstant.MQ_IDEMPOTENT_PREFIX + "post:comment:" + msg.getCommentId();
+        Boolean first = stringRedisTemplate.opsForValue().setIfAbsent(
+                dedupeKey, "1", RedisConstant.MQ_IDEMPOTENT_TTL_HOURS, TimeUnit.HOURS);
+        if (!Boolean.TRUE.equals(first)) {
+            channel.basicAck(deliveryTag, false);
+            log.info("重复消息已跳过: key={}", dedupeKey);
+            return;
+        }
         try {
             PostComment comment = new PostComment();
             comment.setId(msg.getCommentId());

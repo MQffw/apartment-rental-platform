@@ -1,8 +1,8 @@
 package com.atguigu.lease.web.app.service.impl;
 
 import com.atguigu.lease.common.constant.RedisConstant;
-import com.atguigu.lease.web.app.custom.LoginUser;
-import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
+import com.atguigu.lease.common.login.LoginUser;
+import com.atguigu.lease.common.login.LoginUserHolder;
 import com.atguigu.lease.model.entity.*;
 import com.atguigu.lease.model.enums.ItemType;
 import com.atguigu.lease.web.app.mapper.*;

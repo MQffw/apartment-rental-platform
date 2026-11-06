@@ -8,8 +8,9 @@ import com.atguigu.lease.common.result.Result;
 import com.atguigu.lease.common.result.ResultCodeEnum;
 import com.atguigu.lease.model.entity.PostComment;
 import com.atguigu.lease.model.entity.UserInfo;
-import com.atguigu.lease.web.app.custom.LoginUser;
-import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
+import com.atguigu.lease.common.login.LoginUser;
+import com.atguigu.lease.common.login.LoginUserHolder;
+import com.atguigu.lease.common.ratelimit.RateLimit;
 import com.atguigu.lease.web.app.mapper.UserInfoMapper;
 import com.atguigu.lease.web.app.service.PostCommentService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -22,7 +23,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Tag(name = "帖子评论")
 @RestController
@@ -43,30 +43,31 @@ public class PostCommentController {
     private UserInfoMapper userInfoMapper;
 
     @Operation(summary = "发布评论（异步入库）")
+    @RateLimit(max = 3, window = 10, message = "评论太频繁，请稍后再试")
     @PostMapping("create")
     public Result<Long> create(@RequestBody PostCommentMessage msg) {
         LoginUser loginUser = LoginUserHolder.getLoginUser();
         if (loginUser == null) {
             throw new LeaseException(ResultCodeEnum.APP_LOGIN_AUTH);
         }
-        // 限流: 10秒内最多3次
-        String rateKey = RedisConstant.RATE_LIMIT_PREFIX + loginUser.getUserId() + ":comment";
-        String rateVal = stringRedisTemplate.opsForValue().get(rateKey);
-        if (rateVal != null && Integer.parseInt(rateVal) >= 3) {
-            throw new LeaseException(ResultCodeEnum.PARAM_ERROR, "评论太频繁，请稍后再试");
+        // Redis 序列预生成 commentId（作为消费端幂等键），发 MQ 异步入库。
+        // 序列缺失时先以 DB 最大 id 对齐，避免与 AUTO_INCREMENT 主键冲突（同发帖逻辑）
+        String seqKey = "post:comment:id:seq";
+        if (Boolean.FALSE.equals(stringRedisTemplate.hasKey(seqKey))) {
+            PostComment max = commentService.getOne(new LambdaQueryWrapper<PostComment>()
+                    .select(PostComment::getId)
+                    .orderByDesc(PostComment::getId)
+                    .last("LIMIT 1"));
+            stringRedisTemplate.opsForValue().setIfAbsent(seqKey,
+                    String.valueOf(max != null ? max.getId() : 0L));
         }
-        msg.setUserId(loginUser.getUserId());
-        Long commentId = stringRedisTemplate.opsForValue().increment("post:comment:id:seq");
+        Long commentId = stringRedisTemplate.opsForValue().increment(seqKey);
         msg.setCommentId(commentId);
+        msg.setUserId(loginUser.getUserId());
         rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.POST_COMMENT_EXCHANGE,
                 RabbitMQConfiguration.POST_COMMENT_ROUTING_KEY,
                 msg);
-        // 设置限流
-        Long rateCount = stringRedisTemplate.opsForValue().increment(rateKey);
-        if (rateCount != null && rateCount == 1) {
-            stringRedisTemplate.expire(rateKey, 10, TimeUnit.SECONDS);
-        }
         return Result.ok(commentId);
     }
 

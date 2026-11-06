@@ -1,0 +1,59 @@
+# 开发环境：指向本地/内网中间件，SQL 日志全开便于调试
+# 敏感项无默认值：从仓库根 .env.properties 读取（模板见 .env.properties.example）
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://192.168.10.101:3306/lease?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2b8
+    username: root
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-test-query: SELECT 1 # 自动检测连接
+      connection-timeout: 60000 #数据库连接超时时间,默认30秒
+      idle-timeout: 500000 #空闲连接存活最大时间，默认600000（10分钟）
+      max-lifetime: 540000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+      maximum-pool-size: 12 #连接池最大连接数，默认是10
+      minimum-idle: 10 #最小空闲连接数量
+      pool-name: SPHHikariPool # 连接池名称
+  mail:
+    host: smtp.qq.com  # SMTP服务器
+    port: 587           # 端口
+    username: ${MAIL_USERNAME}  # 发件邮箱（真实值在 .env.properties）
+    # 授权码（非登录密码），真实值在 .env.properties
+    password: ${MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  data:
+    redis:
+      host: 192.168.10.101  # Redis服务器地址
+      port: 6379             # Redis端口
+      database: 0            # 数据库索引
+  rabbitmq:
+    host: 192.168.10.101
+    port: 5672
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASS}
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 10
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 3000
+
+# 开发环境打印框架生成的sql语句，便于调试
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# JWT 密钥：dev 提供兜底值（仅限开发），生产走 JWT_SECRET 环境变量
+jwt:
+  secret: ${JWT_SECRET:dev-secret-please-change-0123456789abcdef}
+  expiration: 86400000 # 24小时

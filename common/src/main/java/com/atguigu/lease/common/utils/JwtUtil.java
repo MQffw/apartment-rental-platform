@@ -22,24 +22,41 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() {
+        // fail-fast：密钥缺失或长度不足时启动即失败，而非运行期 NPE
+        if (jwtProperties.getSecret() == null
+                || jwtProperties.getSecret().getBytes().length < 32) {
+            throw new IllegalStateException(
+                    "jwt.secret 未配置或长度不足32字节（HS256要求），请通过配置或 JWT_SECRET 环境变量注入");
+        }
         staticTokenSignKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
         staticTokenExpiration = jwtProperties.getExpiration();
     }
 
-    public static String createToken(Long userId, String username) {
-        return createToken(userId, username, null);
-    }
+    /** token 用途声明：管理端 */
+    public static final String SCOPE_ADMIN = "admin";
+    /** token 用途声明：用户端 */
+    public static final String SCOPE_APP = "app";
 
-    public static String createToken(Long userId, String username, Integer userType) {
+    public static String createToken(Long userId, String username, String scope) {
         var builder = Jwts.builder()
                 .setSubject("USER_INFO")
                 .setExpiration(new Date(System.currentTimeMillis() + staticTokenExpiration))
                 .claim("userId", userId)
-                .claim("username", username);
-        if (userType != null) {
-            builder.claim("userType", userType);
-        }
+                .claim("username", username)
+                .claim("scope", scope);
         return builder.signWith(staticTokenSignKey).compact();
+    }
+
+    /**
+     * 校验 token 用途是否匹配。双端共享同一签名密钥，若不区分 scope，
+     * 用户端 token 可通过管理端认证（user_info 与 system_user 独立自增，
+     * id 撞号时普通用户即等同于管理员），因此跨端 token 必须拒绝。
+     */
+    public static void validateScope(Claims claims, String expectedScope) {
+        String scope = claims.get("scope", String.class);
+        if (!expectedScope.equals(scope)) {
+            throw new LeaseException(ResultCodeEnum.TOKEN_INVALID);
+        }
     }
 
     public static Claims parseToken(String token) {

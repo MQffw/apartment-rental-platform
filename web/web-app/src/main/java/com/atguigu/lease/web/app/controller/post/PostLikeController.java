@@ -6,8 +6,9 @@ import com.atguigu.lease.common.mq.RabbitMQConfiguration;
 import com.atguigu.lease.common.mq.dto.PostLikeMessage;
 import com.atguigu.lease.common.result.Result;
 import com.atguigu.lease.common.result.ResultCodeEnum;
-import com.atguigu.lease.web.app.custom.LoginUser;
-import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
+import com.atguigu.lease.common.login.LoginUser;
+import com.atguigu.lease.common.login.LoginUserHolder;
+import com.atguigu.lease.common.ratelimit.RateLimit;
 import com.atguigu.lease.web.app.mapper.PostInfoMapper;
 import com.atguigu.lease.model.entity.PostInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,17 +59,12 @@ public class PostLikeController {
             "end";
 
     @Operation(summary = "点赞/取消点赞")
+    @RateLimit(max = 10, window = 1, message = "操作太频繁")
     @PostMapping("toggle/{postId}")
     public Result<Map<String, Object>> toggle(@PathVariable Long postId) {
         LoginUser loginUser = LoginUserHolder.getLoginUser();
         if (loginUser == null) {
             throw new LeaseException(ResultCodeEnum.APP_LOGIN_AUTH);
-        }
-        // 限流: 1秒内最夞点赞10次
-        String rateKey = RedisConstant.RATE_LIMIT_PREFIX + loginUser.getUserId() + ":like";
-        String rateVal = stringRedisTemplate.opsForValue().get(rateKey);
-        if (rateVal != null && Integer.parseInt(rateVal) >= 10) {
-            throw new LeaseException(ResultCodeEnum.PARAM_ERROR, "操作太频繁");
         }
 
         String usersKey = RedisConstant.POST_LIKE_USERS_PREFIX + postId + RedisConstant.POST_LIKE_USERS_SUFFIX;
@@ -94,12 +90,6 @@ public class PostLikeController {
                 RabbitMQConfiguration.POST_LIKE_EXCHANGE,
                 RabbitMQConfiguration.POST_LIKE_ROUTING_KEY,
                 msg);
-
-        // 更新限流计数
-        Long rateCount = stringRedisTemplate.opsForValue().increment(rateKey);
-        if (rateCount != null && rateCount == 1) {
-            stringRedisTemplate.expire(rateKey, 1, java.util.concurrent.TimeUnit.SECONDS);
-        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("isLiked", isLike);

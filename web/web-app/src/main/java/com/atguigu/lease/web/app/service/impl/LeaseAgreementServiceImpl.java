@@ -17,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,29 +74,40 @@ public class LeaseAgreementServiceImpl extends ServiceImpl<LeaseAgreementMapper,
         }
         //2.查询公寓信息
         ApartmentInfo apartmentInfo = apartmentInfoMapper.selectById(leaseAgreement.getApartmentId());
-
         //3.查询房间信息
         RoomInfo roomInfo = roomInfoMapper.selectById(leaseAgreement.getRoomId());
-
         //4.查询图片信息
-        List<GraphVo> roomGraphVoList = graphInfoMapper.selectListByItemTypeAndId(ItemType.ROOM, leaseAgreement.getRoomId());
-        List<GraphVo> apartmentGraphVoList = graphInfoMapper.selectListByItemTypeAndId(ItemType.APARTMENT, leaseAgreement.getApartmentId());
-
+        List<GraphVo> roomGraphVoList = leaseAgreement.getRoomId() != null
+                ? graphInfoMapper.selectListByItemTypeAndId(ItemType.ROOM, leaseAgreement.getRoomId())
+                : Collections.emptyList();
+        List<GraphVo> apartmentGraphVoList = leaseAgreement.getApartmentId() != null
+                ? graphInfoMapper.selectListByItemTypeAndId(ItemType.APARTMENT, leaseAgreement.getApartmentId())
+                : Collections.emptyList();
         //5.查询支付方式
-        PaymentType paymentType = paymentTypeMapper.selectById(leaseAgreement.getPaymentTypeId());
-
+        PaymentType paymentType = leaseAgreement.getPaymentTypeId() != null
+                ? paymentTypeMapper.selectById(leaseAgreement.getPaymentTypeId()) : null;
         //6.查询租期
-        LeaseTerm leaseTerm = leaseTermMapper.selectById(leaseAgreement.getLeaseTermId());
+        LeaseTerm leaseTerm = leaseAgreement.getLeaseTermId() != null
+                ? leaseTermMapper.selectById(leaseAgreement.getLeaseTermId()) : null;
 
         AgreementDetailVo agreementDetailVo = new AgreementDetailVo();
         BeanUtils.copyProperties(leaseAgreement, agreementDetailVo);
-        agreementDetailVo.setApartmentName(apartmentInfo.getName());
-        agreementDetailVo.setRoomNumber(roomInfo.getRoomNumber());
+        // 关联数据可能缺失（历史脏数据/字段为空），null 安全赋值，避免 NPE（203）
+        if (apartmentInfo != null) {
+            agreementDetailVo.setApartmentName(apartmentInfo.getName());
+        }
+        if (roomInfo != null) {
+            agreementDetailVo.setRoomNumber(roomInfo.getRoomNumber());
+        }
         agreementDetailVo.setApartmentGraphVoList(apartmentGraphVoList);
         agreementDetailVo.setRoomGraphVoList(roomGraphVoList);
-        agreementDetailVo.setPaymentTypeName(paymentType.getName());
-        agreementDetailVo.setLeaseTermMonthCount(leaseTerm.getMonthCount());
-        agreementDetailVo.setLeaseTermUnit(leaseTerm.getUnit());
+        if (paymentType != null) {
+            agreementDetailVo.setPaymentTypeName(paymentType.getName());
+        }
+        if (leaseTerm != null) {
+            agreementDetailVo.setLeaseTermMonthCount(leaseTerm.getMonthCount());
+            agreementDetailVo.setLeaseTermUnit(leaseTerm.getUnit());
+        }
 
         return agreementDetailVo;
     }
@@ -153,8 +165,32 @@ public class LeaseAgreementServiceImpl extends ServiceImpl<LeaseAgreementMapper,
     }
 
     @Override
-    public boolean saveOrUpdate(LeaseAgreement leaseAgreement) {
-        return super.saveOrUpdate(leaseAgreement);
+    public boolean saveOrUpdate(LeaseAgreement entity) {
+        // 更新场景的安全校验（防 IDOR 与绕过状态机）：
+        // 1. 指定的 id 必须存在——禁止凭空 upsert 任意主键；
+        // 2. 归属校验——只允许操作承租人为当前登录用户的租约（Controller 已将 email 填充为当前用户）；
+        //    否则攻击者可传他人租约 id，email 被强制覆盖后将他人租约"窃取"到自己名下；
+        // 3. 状态变更必须符合状态机——防止前端通过本接口绕过 updateStatusById 的流转校验。
+        if (entity.getId() != null) {
+            LeaseAgreement existing = leaseAgreementMapper.selectById(entity.getId());
+            if (existing == null) {
+                throw new LeaseException(ResultCodeEnum.ILLEGAL_REQUEST, "租约不存在");
+            }
+            if (!existing.getEmail().equals(entity.getEmail())) {
+                throw new LeaseException(ResultCodeEnum.ILLEGAL_REQUEST);
+            }
+            if (entity.getStatus() != null && !entity.getStatus().equals(existing.getStatus())) {
+                Set<LeaseStatus> allowed = VALID_TRANSITIONS.get(existing.getStatus());
+                if (allowed == null || !allowed.contains(entity.getStatus())) {
+                    throw new LeaseException(ResultCodeEnum.PARAM_ERROR,
+                            String.format("不允许从 [%s] 转换到 [%s]",
+                                    existing.getStatus().getName(), entity.getStatus().getName()));
+                }
+            }
+            // 承租人邮箱不允许通过本接口变更（置 null 后 MP 默认策略不更新该列）
+            entity.setEmail(null);
+        }
+        return super.saveOrUpdate(entity);
     }
 }
 

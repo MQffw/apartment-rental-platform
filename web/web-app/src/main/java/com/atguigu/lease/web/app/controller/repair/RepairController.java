@@ -6,8 +6,8 @@ import com.atguigu.lease.common.result.ResultCodeEnum;
 import com.atguigu.lease.model.entity.LeaseAgreement;
 import com.atguigu.lease.model.entity.RepairRequest;
 import com.atguigu.lease.model.enums.LeaseStatus;
-import com.atguigu.lease.web.app.custom.LoginUser;
-import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
+import com.atguigu.lease.common.login.LoginUser;
+import com.atguigu.lease.common.login.LoginUserHolder;
 import com.atguigu.lease.web.app.service.RepairRequestService;
 import com.atguigu.lease.web.app.service.LeaseAgreementService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -43,8 +43,10 @@ public class RepairController {
     @PostMapping("save")
     public Result save(@RequestBody RepairRequest repair) {
         LoginUser loginUser = getCurrentUser();
-        // 查询当前用户的已签约租约，获取roomId和apartmentId
+        // 查询【当前登录用户】的已签约租约，获取roomId和apartmentId
+        // 归属过滤缺失会导致 IDOR：任何登录用户都能引用他人租约的房间报修
         LambdaQueryWrapper<LeaseAgreement> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(LeaseAgreement::getEmail, loginUser.getUsername());
         wrapper.eq(LeaseAgreement::getStatus, LeaseStatus.SIGNED);
         wrapper.last("LIMIT 1");
         LeaseAgreement agreement = agreementService.getOne(wrapper);

@@ -1,7 +1,7 @@
 package com.atguigu.lease.web.app.controller.agreement;
 
-import com.atguigu.lease.web.app.custom.LoginUser;
-import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
+import com.atguigu.lease.common.login.LoginUser;
+import com.atguigu.lease.common.login.LoginUserHolder;
 import com.atguigu.lease.common.result.Result;
 import com.atguigu.lease.common.result.ResultCodeEnum;
 import com.atguigu.lease.common.exception.LeaseException;

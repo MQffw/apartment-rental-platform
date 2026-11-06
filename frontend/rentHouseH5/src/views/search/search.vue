@@ -1,20 +1,22 @@
 <template>
-  <SearchBar :confirm-callback="confirmCallback"></SearchBar>
+  <div class="search-page">
+    <SearchBar :confirm-callback="confirmCallback"></SearchBar>
 
-  <div class="main-container">
-    <PullDownRefreshContainer
-      :request="getRoomListHandler"
-      ref="pullDownRefreshContainerRef"
-      class="min-h-[70vh]"
-    >
-      <template v-if="roomList?.length">
-        <RoomCard
-          v-for="item in roomList"
-          :key="item.id"
-          :data="item"
-        ></RoomCard>
-      </template>
-    </PullDownRefreshContainer>
+    <div class="main-container">
+      <PullDownRefreshContainer
+        :request="getRoomListHandler"
+        ref="pullDownRefreshContainerRef"
+        class="min-h-[70vh]"
+      >
+        <template v-if="roomList?.length">
+          <RoomCard
+            v-for="item in roomList"
+            :key="item.id"
+            :data="item"
+          ></RoomCard>
+        </template>
+      </PullDownRefreshContainer>
+    </div>
   </div>
 </template>
 
@@ -59,4 +61,13 @@ async function getRoomListHandler(pageInfo: ReqPage) {
 </script>
 
 <style scoped lang="less">
+.search-page {
+  // 筛选条钉在吸顶导航条（46px）正下方；玻璃视觉已由全局样式
+  // （.van-dropdown-menu__bar）统一提供，此处只管吸顶定位与层级
+  :deep(.van-dropdown-menu) {
+    position: sticky;
+    top: 46px;
+    z-index: 997;
+  }
+}
 </style>

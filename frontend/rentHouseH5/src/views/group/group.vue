@@ -1,7 +1,8 @@
 <template>
   <div class="group-page" :class="{ dark: isDark }">
-    <!-- 顶部Tab -->
-    <van-tabs v-model:active="activeTab" sticky swipeable @change="onTabChange">
+    <!-- 顶部Tab：页面级 CSS sticky 吸顶于导航条(46px)下方（van-tabs 自带的
+         sticky 依赖其滚动容器，在本页布局下不生效，故用与找房页筛选条一致的方案） -->
+    <van-tabs v-model:active="activeTab" swipeable @change="onTabChange">
       <van-tab title="最新" name="latest" />
       <van-tab title="热门" name="hot" />
       <van-tab title="好评" name="rating" />
@@ -200,6 +201,17 @@ async function handleLike(post: any) {
 
   &.dark {
     background: #1a1a1a;
+  }
+
+  // 仅钉住 tabs 的标题条（wrap）在吸顶导航条（46px）正下方：
+  // 滚动时标签栏不跟跑，帖子列表正常滚动从下方穿过。
+  // 注意：van-tabs__wrap 原生带 overflow:hidden，sticky 元素自身
+  // 有 overflow:hidden 会失效，必须改为 visible
+  :deep(.van-tabs__wrap) {
+    position: sticky;
+    top: 46px;
+    z-index: 997;
+    overflow: visible;
   }
 }
 

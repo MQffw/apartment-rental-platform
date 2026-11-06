@@ -16,6 +16,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -31,6 +32,15 @@ public class NotificationConsumer {
     public void onMessage(NotificationMessage msg,
                           Channel channel,
                           @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
+        // 幂等检查：基于 msgId 去重，重投递消息直接 ack 跳过
+        String dedupeKey = RedisConstant.MQ_IDEMPOTENT_PREFIX + "notification:" + msg.getMsgId();
+        Boolean first = stringRedisTemplate.opsForValue().setIfAbsent(
+                dedupeKey, "1", RedisConstant.MQ_IDEMPOTENT_TTL_HOURS, TimeUnit.HOURS);
+        if (!Boolean.TRUE.equals(first)) {
+            channel.basicAck(deliveryTag, false);
+            log.info("重复消息已跳过: key={}", dedupeKey);
+            return;
+        }
         try {
             Notification notification = new Notification();
             notification.setUserId(msg.getUserId());

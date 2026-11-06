@@ -1,0 +1,52 @@
+# 开发环境：指向本地/内网中间件，SQL 日志全开便于调试
+# 敏感项无默认值：从仓库根 .env.properties 读取（模板见 .env.properties.example）
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://192.168.10.101:3306/lease?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2b8
+    username: root
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-test-query: SELECT 1 # 自动检测连接
+      connection-timeout: 60000 #数据库连接超时时间,默认30秒
+      idle-timeout: 500000 #空闲连接存活最大时间，默认600000（10分钟）
+      max-lifetime: 540000 #此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认1800000即30分钟
+      maximum-pool-size: 12 #连接池最大连接数，默认是10
+      minimum-idle: 10 #最小空闲连接数量
+      pool-name: SPHHikariPool # 连接池名称
+  data:
+    redis:
+      host: 192.168.10.101
+      port: 6379
+      database: 0
+  rabbitmq:
+    host: 192.168.10.101
+    port: 5672
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASS}
+    virtual-host: /
+  # 数据库版本管理：双端共享库，迁移统一由 web-admin 执行（web-app 不引入 flyway 依赖）
+  # baseline-version=3：已有旧表的库直接 baseline 跳过 V1-V3（其数据已存在）；
+  # 空库则不触发 baseline，V1-V3 顺序全量执行。若默认 baseline 到 1，旧库会执行 V2/V3
+  # 的固定 id INSERT 造成主键冲突 → 迁移失败 → 应用启动失败
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 3
+    locations: classpath:db/migration
+
+# 开发环境打印框架生成的sql语句，便于调试
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+minio:
+  endpoint: http://192.168.10.101:9000
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket-name: lease
+
+# JWT 密钥：dev 提供兜底值（仅限开发），生产走 JWT_SECRET 环境变量
+jwt:
+  secret: ${JWT_SECRET:dev-secret-please-change-0123456789abcdef}
+  expiration: 86400000 # 24小时

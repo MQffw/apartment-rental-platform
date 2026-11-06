@@ -9,8 +9,9 @@ import com.atguigu.lease.common.result.ResultCodeEnum;
 import com.atguigu.lease.model.entity.PostInfo;
 import com.atguigu.lease.model.entity.UserInfo;
 import com.atguigu.lease.model.enums.PostStatus;
-import com.atguigu.lease.web.app.custom.LoginUser;
-import com.atguigu.lease.web.app.custom.holder.LoginUserHolder;
+import com.atguigu.lease.common.login.LoginUser;
+import com.atguigu.lease.common.login.LoginUserHolder;
+import com.atguigu.lease.common.ratelimit.RateLimit;
 import com.atguigu.lease.web.app.mapper.UserInfoMapper;
 import com.atguigu.lease.web.app.service.PostService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -28,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Tag(name = "帖子/点评")
 @RestController
@@ -57,25 +57,29 @@ public class PostController {
     }
 
     @Operation(summary = "发布帖子（异步入库）")
+    @RateLimit(max = 1, window = 60, message = "发帖太频繁，请稍后再试")
     @PostMapping("create")
     public Result<Long> create(@RequestBody PostCreateMessage msg) {
         LoginUser loginUser = getCurrentUser();
-        // 限流检查：60秒内最多发1篇
-        String rateKey = RedisConstant.RATE_LIMIT_PREFIX + loginUser.getUserId() + ":post";
-        String rateVal = stringRedisTemplate.opsForValue().get(rateKey);
-        if (rateVal != null && Integer.parseInt(rateVal) >= 1) {
-            throw new LeaseException(ResultCodeEnum.PARAM_ERROR, "发帖太频繁，请稍后再试");
+        // Redis 序列预生成 postId（作为消费端幂等键），发 MQ 异步入库。
+        // 序列缺失时先以 DB 最大 id 对齐：否则序列从 1 起步，会与表内既有
+        // AUTO_INCREMENT 主键冲突（Duplicate entry），消息只能进死信队列
+        String seqKey = "post:id:seq";
+        if (Boolean.FALSE.equals(stringRedisTemplate.hasKey(seqKey))) {
+            PostInfo max = postService.getOne(new LambdaQueryWrapper<PostInfo>()
+                    .select(PostInfo::getId)
+                    .orderByDesc(PostInfo::getId)
+                    .last("LIMIT 1"));
+            stringRedisTemplate.opsForValue().setIfAbsent(seqKey,
+                    String.valueOf(max != null ? max.getId() : 0L));
         }
-        msg.setUserId(loginUser.getUserId());
-        // 生成ID并发MQ
-        Long postId = stringRedisTemplate.opsForValue().increment("post:id:seq");
+        Long postId = stringRedisTemplate.opsForValue().increment(seqKey);
         msg.setPostId(postId);
+        msg.setUserId(loginUser.getUserId());
         rabbitTemplate.convertAndSend(
                 RabbitMQConfiguration.POST_CREATE_EXCHANGE,
                 RabbitMQConfiguration.POST_CREATE_ROUTING_KEY,
                 msg);
-        // 设置限流
-        stringRedisTemplate.opsForValue().set(rateKey, "1", 60, TimeUnit.SECONDS);
         return Result.ok(postId);
     }
 

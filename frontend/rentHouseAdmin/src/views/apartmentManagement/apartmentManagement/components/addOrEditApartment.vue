@@ -72,23 +72,7 @@
         </div>
       </el-form-item>
       <el-form-item label="详细地址" prop="addressDetail">
-        <el-select
-          v-model="formData.addressDetail"
-          filterable
-          remote
-          clearable
-          placeholder="请输入详细地址查询"
-          :remote-method="remoteMethod"
-          style="width: 100%"
-          @change="addressDetailChangeCallback"
-        >
-          <el-option
-            v-for="item in addressDetailOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
+        <el-input v-model="formData.addressDetail" placeholder="请输入详细地址" />
       </el-form-item>
       <el-form-item label="公寓前台电话" prop="phone">
         <el-input v-model="formData.phone" />
@@ -181,7 +165,6 @@
 import { nextTick, onMounted, reactive, ref } from 'vue'
 import { ElMessage, FormInstance, UploadFiles } from 'element-plus'
 import {
-  AddressOptionsInterface,
   ApartmentInterface,
   FacilityInfoInterface,
   LabelInfoInterface,
@@ -203,7 +186,6 @@ import {
   getProvinceList,
   saveOrUpdateApartment,
 } from '@/api/apartmentManagement'
-import { useMap } from '@/hooks/useMap'
 import { TreeData } from '@/api/apartmentManagement/types'
 // import { ElTree } from 'element-plus/es/components/tree'
 import { UploadFile } from 'element-plus/es/components/upload/src/upload'
@@ -363,63 +345,7 @@ const districtClearCallback = () => {
 //#endregion
 
 //#endregion
-//#region <高德地图相关>
-// 详细地址建议列表
-const addressDetailOptions = ref<AddressOptionsInterface[]>([])
-
-// 地图实例
-const { AMap } = useMap()
-// 动态地址改查询
-function remoteMethod(keywords: string) {
-  if (keywords.trim()) {
-    const provinceName =
-      areaInfo.provinceList.find(
-        (item) => item.id === formData.value.provinceId,
-      )?.name || ''
-
-    const districtName =
-      areaInfo.districtList.find(
-        (item) => item.id === formData.value.districtId,
-      )?.name || ''
-    keywords = provinceName + districtName + keywords
-    AMap.value.plugin('AMap.AutoComplete', function () {
-      // 实例化Autocomplete
-      let autoOptions = {
-        city: '全国',
-      }
-      console.log('AMap', AMap.value)
-      console.log('keywords', keywords)
-      let autoComplete = new AMap.value.AutoComplete(autoOptions)
-      autoComplete.search(keywords, function (status: any, result: any) {
-        // 搜索成功时，result即是对应的匹配数据
-        console.log('result', result)
-        addressDetailOptions.value =
-          result?.tips?.map((item: any) => {
-            return {
-              label: item.district + item.name + item.address,
-              value: item.district + item.name + item.address,
-              location: item.location,
-            }
-          }) || []
-      })
-    })
-  } else {
-    addressDetailOptions.value = []
-  }
-}
-// 详细地址改变回调
-function addressDetailChangeCallback(value: string | number) {
-  const targetObj = addressDetailOptions.value.find(
-    (item) => item.value === value,
-  )
-  if (targetObj) {
-    // lng  经度
-    formData.value.longitude = targetObj.location?.lng || ''
-    // lat  纬度
-    formData.value.latitude = targetObj.location?.lat || ''
-  }
-}
-//#endregion
+// 详细地址：手动输入（已移除高德地图 SDK，原地址搜索/经纬度自动填充功能一并移除）
 //#region <配套信息、标签信息、杂费信息>
 // 配套信息
 const facilityInfoList = ref<FacilityInfoInterface[]>([])
@@ -512,16 +438,6 @@ async function getApartmentInfoByIdHandle(id: number | string) {
     delete data.labelInfoList
     data.feeValueIds = data.feeValueVoList?.map((item) => item.id) as number[]
     delete data.feeValueVoList
-    addressDetailOptions.value = [
-      {
-        label: data.addressDetail,
-        value: data.addressDetail,
-        location: {
-          lng: data.longitude,
-          lat: data.latitude,
-        },
-      },
-    ]
     formData.value = data as FormDataInstance
     // 重置省市区
     // 获取城市

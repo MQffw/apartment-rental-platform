@@ -1,8 +1,8 @@
 <template>
   <van-nav-bar
     v-if="isShowNavBar"
-    fixed
-    placeholder
+    class="liquid-nav"
+    :class="{ dark: isDark }"
     :title="title"
     :left-arrow="showBack"
     @click-left="onClickLeft"
@@ -45,10 +45,45 @@ const showBack = computed(() => {
 const title = computed(() => {
   const tabBarPaths = tabBarRoutes.map(item => item.path);
   if (tabBarPaths.includes(route.path)) {
-    return "桔巢";
+    return "栖巢";
   }
   return (route.meta?.title as string) || "";
 });
 </script>
 
-<style scoped></style>
+<style scoped lang="less">
+// 吸顶毛玻璃导航条：占文档流不遮挡内容，滚动时吸附顶部、内容从玻璃后穿过。
+// 玻璃视觉（半透明底+blur+分割线）由全局样式统一提供，此处仅处理吸顶与层级
+.liquid-nav {
+  position: sticky;
+  top: 0;
+  z-index: 998;
+  --van-nav-bar-background: transparent;
+  --van-nav-bar-height: 46px;
+
+  :deep(.van-nav-bar__title) {
+    color: #1f1f1f;
+    font-weight: 600;
+  }
+
+  :deep(.van-nav-bar__arrow) {
+    color: #277941;
+  }
+
+  :deep(.van-nav-bar__text) {
+    color: #1f1f1f;
+  }
+}
+
+// 暗色模式文字/箭头配色
+.liquid-nav.dark {
+  :deep(.van-nav-bar__title),
+  :deep(.van-nav-bar__text) {
+    color: #eee;
+  }
+
+  :deep(.van-nav-bar__arrow) {
+    color: #34c759;
+  }
+}
+</style>

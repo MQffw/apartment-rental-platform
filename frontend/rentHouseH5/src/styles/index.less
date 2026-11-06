@@ -50,7 +50,69 @@ a:hover {
 /* 定义 覆盖vant样式*/
 :root:root {
   --van-primary-color: #277941;
+}
 
+// 页面内嵌筛选条/标签条：同族毛玻璃视觉（半透明底+blur+分割线）。
+// 双保险：①变量就近覆盖（组件按需样式在 :root 上重定义了
+// --van-dropdown-menu-background 为不透明白且注入顺序靠后，
+// 挂到元素自身可越过该竞争）②:root:root 提权直接写玻璃样式
+:root:root .van-dropdown-menu__bar {
+  --van-dropdown-menu-background: rgba(255, 255, 255, 0.72);
+  --van-dropdown-menu-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+:root:root .van-tabs .van-tabs__wrap {
+  --van-tabs-nav-background: rgba(255, 255, 255, 0.72);
+}
+
+:root:root .van-dropdown-menu__bar,
+:root:root .van-tabs .van-tabs__wrap {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.dark :root:root .van-dropdown-menu__bar {
+  --van-dropdown-menu-background: rgba(30, 30, 30, 0.78);
+  --van-dropdown-menu-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+html.dark :root:root .van-tabs .van-tabs__wrap {
+  --van-tabs-nav-background: rgba(30, 30, 30, 0.78);
+}
+html.dark :root:root .van-dropdown-menu__bar,
+html.dark :root:root .van-tabs .van-tabs__wrap {
+  background: rgba(30, 30, 30, 0.78);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+// ========== 全局毛玻璃工具类 ==========
+// 与吸顶导航条/筛选条同族视觉：半透明底 + 20px 模糊 + 底部细分割线。
+// 用法：给需要玻璃化的顶部条元素加 .glass-bar，暗色自动适配
+
+.glass-bar {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.dark .glass-bar {
+  background: rgba(30, 30, 30, 0.78);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+// ========== 全局玻璃化顶栏（所有页面统一） ==========
+// 导航条（占位/吸顶）与页面内嵌筛选/标签条统一毛玻璃效果
+.van-nav-bar__content {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.dark .van-nav-bar__content {
+  background: rgba(30, 30, 30, 0.78);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 // ========== 基础交互 ==========

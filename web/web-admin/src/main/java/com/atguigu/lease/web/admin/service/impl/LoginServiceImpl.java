@@ -75,7 +75,7 @@ public class LoginServiceImpl implements LoginService {
             throw new LeaseException(ResultCodeEnum.ADMIN_ACCOUNT_ERROR);
         }
         log.info("管理员登录成功, userId={}, username={}", systemUser.getId(), systemUser.getUsername());
-        return JwtUtil.createToken(systemUser.getId(), systemUser.getUsername());
+        return JwtUtil.createToken(systemUser.getId(), systemUser.getUsername(), JwtUtil.SCOPE_ADMIN);
     }
 
     @Override

@@ -113,7 +113,7 @@ public class LoginServiceImpl implements LoginService {
 
         // 6. 创建并返回JWT Token
         log.info("用户验证码登录成功, userId={}, email={}", userInfo.getId(), loginVo.getEmail());
-        return JwtUtil.createToken(userInfo.getId(), loginVo.getEmail());
+        return JwtUtil.createToken(userInfo.getId(), loginVo.getEmail(), JwtUtil.SCOPE_APP);
     }
 
     @Override
@@ -151,7 +151,7 @@ public class LoginServiceImpl implements LoginService {
 
         // 5. 创建并返回JWT Token
         log.info("用户密码登录成功, userId={}, email={}", userInfo.getId(), loginVo.getEmail());
-        return JwtUtil.createToken(userInfo.getId(), loginVo.getEmail());
+        return JwtUtil.createToken(userInfo.getId(), loginVo.getEmail(), JwtUtil.SCOPE_APP);
     }
 
     @Override

@@ -42,4 +42,39 @@
         </dependency>
     </dependencies>
 
+    <!-- 核心业务类的覆盖率门禁：低于阈值则构建失败，防止覆盖率滑坡 -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>check-core-coverage</id>
+                        <goals><goal>check</goal></goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <includes>
+                                        <include>com.atguigu.lease.web.app.service.impl.LeaseAgreementServiceImpl</include>
+                                        <include>com.atguigu.lease.web.app.service.impl.ViewAppointmentServiceImpl</include>
+                                        <include>com.atguigu.lease.web.app.mq.PostCreateConsumer</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.60</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

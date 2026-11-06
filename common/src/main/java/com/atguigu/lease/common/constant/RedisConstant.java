@@ -45,4 +45,11 @@ public class RedisConstant {
 
     // ==================== 限流 ====================
     public static final String RATE_LIMIT_PREFIX = "rate:limit:";
+
+    // ==================== MQ 消费幂等 ====================
+    public static final String MQ_IDEMPOTENT_PREFIX = "mq:idempotent:";
+    public static final Integer MQ_IDEMPOTENT_TTL_HOURS = 24;
+
+    // ==================== 定时任务分布式锁 ====================
+    public static final String TASK_LOCK_PREFIX = "lock:task:";
 }

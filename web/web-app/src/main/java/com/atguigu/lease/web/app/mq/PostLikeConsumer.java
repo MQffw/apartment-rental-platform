@@ -1,5 +1,6 @@
 package com.atguigu.lease.web.app.mq;
 
+import com.atguigu.lease.common.constant.RedisConstant;
 import com.atguigu.lease.common.mq.RabbitMQConfiguration;
 import com.atguigu.lease.common.mq.dto.NotificationMessage;
 import com.atguigu.lease.common.mq.dto.PostLikeMessage;
@@ -16,10 +17,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -37,10 +40,23 @@ public class PostLikeConsumer {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
     @RabbitListener(queues = RabbitMQConfiguration.POST_LIKE_QUEUE)
     public void onMessage(PostLikeMessage msg,
                           Channel channel,
                           @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
+        // 幂等检查：同一 (帖子,用户,动作) 的重复投递直接 ack 跳过
+        String dedupeKey = RedisConstant.MQ_IDEMPOTENT_PREFIX + "post:like:"
+                + msg.getPostId() + ":" + msg.getUserId() + ":" + msg.getAction();
+        Boolean first = stringRedisTemplate.opsForValue().setIfAbsent(
+                dedupeKey, "1", RedisConstant.MQ_IDEMPOTENT_TTL_HOURS, TimeUnit.HOURS);
+        if (!Boolean.TRUE.equals(first)) {
+            channel.basicAck(deliveryTag, false);
+            log.info("重复消息已跳过: key={}", dedupeKey);
+            return;
+        }
         try {
             if ("like".equals(msg.getAction())) {
                 PostLike like = new PostLike();
