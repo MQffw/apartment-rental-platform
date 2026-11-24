@@ -129,7 +129,7 @@ onMounted(() => {
   justify-content: space-between;
   padding: 8px 20px 4px;
   position: sticky;
-  top: 46px;
+  top: 0;
   z-index: 10;
   background: #f5f7fa;
 

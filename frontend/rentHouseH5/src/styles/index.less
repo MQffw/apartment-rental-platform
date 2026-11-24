@@ -72,17 +72,26 @@ a:hover {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
 }
 
-html.dark :root:root .van-dropdown-menu__bar {
+// 暗色覆盖。注意选择器合法性：:root 只能匹配 <html> 自身，不能写成
+// "html.dark :root:root X"（要求 :root 是 html 的后代，永远匹配不到）——
+// 旧写法正是暗色玻璃从不生效的根因。这里用同元素复合选择器
+// :root.dark:root / :root.van-theme-dark:root（后者由 van-config-provider
+// theme=dark 时挂在 <html> 上，双保险），特异性 (0,4,0) 压过浅色规则 (0,3,0)
+:root.dark:root .van-dropdown-menu__bar,
+:root.van-theme-dark:root .van-dropdown-menu__bar {
   --van-dropdown-menu-background: rgba(30, 30, 30, 0.78);
   --van-dropdown-menu-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
 }
-html.dark :root:root .van-tabs .van-tabs__wrap {
+:root.dark:root .van-tabs .van-tabs__wrap,
+:root.van-theme-dark:root .van-tabs .van-tabs__wrap {
   --van-tabs-nav-background: rgba(30, 30, 30, 0.78);
 }
-html.dark :root:root .van-dropdown-menu__bar,
-html.dark :root:root .van-tabs .van-tabs__wrap {
-  background: rgba(30, 30, 30, 0.78);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+:root.dark:root .van-dropdown-menu__bar,
+:root.dark:root .van-tabs .van-tabs__wrap,
+:root.van-theme-dark:root .van-dropdown-menu__bar,
+:root.van-theme-dark:root .van-tabs .van-tabs__wrap {
+  background: rgba(30, 30, 30, 0.78) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
 // ========== 全局毛玻璃工具类 ==========
@@ -96,7 +105,8 @@ html.dark :root:root .van-tabs .van-tabs__wrap {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
 }
 
-html.dark .glass-bar {
+html.dark .glass-bar,
+.van-theme-dark .glass-bar {
   background: rgba(30, 30, 30, 0.78);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
 }
@@ -110,7 +120,8 @@ html.dark .glass-bar {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
 }
 
-html.dark .van-nav-bar__content {
+html.dark .van-nav-bar__content,
+.van-theme-dark .van-nav-bar__content {
   background: rgba(30, 30, 30, 0.78);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
 }

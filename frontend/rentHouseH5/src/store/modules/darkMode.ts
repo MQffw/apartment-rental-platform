@@ -17,6 +17,16 @@ export const useDarkModeStore = defineStore({
     darkMode: isDarkMode()
   }),
   actions: {
+    // 应用启动时调用：把已保存的深色偏好同步到 <html> 上。
+    // 否则刷新后 store 虽读到了偏好，但 html.dark 缺失，
+    // 全局 html.dark 系列样式（毛玻璃条/Vant 暗色变量）全部失效
+    initDarkMode() {
+      if (this.darkMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    },
     toggleDarkMode() {
       this.darkMode = !this.darkMode;
       if (this.darkMode) {

@@ -62,11 +62,11 @@ async function getRoomListHandler(pageInfo: ReqPage) {
 
 <style scoped lang="less">
 .search-page {
-  // 筛选条钉在吸顶导航条（46px）正下方；玻璃视觉已由全局样式
-  // （.van-dropdown-menu__bar）统一提供，此处只管吸顶定位与层级
+  // 筛选条吸顶（tab 页已无顶部导航条，直接钉在页面顶部）；
+  // 玻璃视觉已由全局样式（.van-dropdown-menu__bar）统一提供
   :deep(.van-dropdown-menu) {
     position: sticky;
-    top: 46px;
+    top: 0;
     z-index: 997;
   }
 }

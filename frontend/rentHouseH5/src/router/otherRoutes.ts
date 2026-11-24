@@ -14,6 +14,16 @@ import type { RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
+    name: "MyRoomDetail",
+    path: "/myRoomDetail",
+    component: () => import("@/views/myRoomDetail/myRoomDetail.vue"),
+    meta: {
+      title: "房间详情",
+      noCache: true,
+      isShowNavBar: true
+    }
+  },
+  {
     name: "RoomDetail",
     path: "/roomDetail",
     component: () => import("@/views/roomDetail/roomDetail.vue"),

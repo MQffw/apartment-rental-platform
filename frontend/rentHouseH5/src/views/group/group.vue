@@ -1,8 +1,7 @@
 <template>
   <div class="group-page" :class="{ dark: isDark }">
-    <!-- 顶部Tab：页面级 CSS sticky 吸顶于导航条(46px)下方（van-tabs 自带的
-         sticky 依赖其滚动容器，在本页布局下不生效，故用与找房页筛选条一致的方案） -->
-    <van-tabs v-model:active="activeTab" swipeable @change="onTabChange">
+    <!-- 顶部Tab：最新/热门/好评/差评，毛玻璃置顶样式（与找房页筛选条同款视觉） -->
+    <van-tabs v-model:active="activeTab" swipeable class="group-filter" @change="onTabChange">
       <van-tab title="最新" name="latest" />
       <van-tab title="热门" name="hot" />
       <van-tab title="好评" name="rating" />
@@ -195,7 +194,7 @@ async function handleLike(post: any) {
 
 <style scoped lang="less">
 .group-page {
-  min-height: calc(100vh - 46px);
+  min-height: 100vh;
   background: #f5f7fa;
   padding-bottom: 80px;
 
@@ -203,15 +202,29 @@ async function handleLike(post: any) {
     background: #1a1a1a;
   }
 
-  // 仅钉住 tabs 的标题条（wrap）在吸顶导航条（46px）正下方：
-  // 滚动时标签栏不跟跑，帖子列表正常滚动从下方穿过。
-  // 注意：van-tabs__wrap 原生带 overflow:hidden，sticky 元素自身
-  // 有 overflow:hidden 会失效，必须改为 visible
+  // 顶部Tab条：与找房页筛选条同款的毛玻璃置顶样式。
+  // 这里显式覆盖（!important 越过 Vant 按需样式注入的变量竞争）：
+  // 半透明底 + 20px 模糊 + 底部细分割线，滚动时帖子列表从条下穿过
   :deep(.van-tabs__wrap) {
     position: sticky;
-    top: 46px;
+    top: 0;
     z-index: 997;
-    overflow: visible;
+    background: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  // 内层导航底色透明化，否则不透明白底会盖掉外层的毛玻璃效果
+  :deep(.van-tabs__nav) {
+    background: transparent !important;
+  }
+
+  &.dark {
+    :deep(.van-tabs__wrap) {
+      background: rgba(30, 30, 30, 0.78) !important;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
   }
 }
 

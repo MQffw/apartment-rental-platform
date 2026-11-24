@@ -37,6 +37,16 @@
         </div>
         <van-icon name="arrow" class="menu-item-arrow" />
       </div>
+      <!-- 深色模式开关（原导航条右上角入口，tab 页隐藏导航条后移到此处）。
+           switch 仅作状态展示，切换统一由整行的 @click 处理；
+           不能给 switch 再绑 update 事件，否则冒泡叠加会一次点击切换两次 -->
+      <div class="menu-item menu-item-sep" @click="toggleDark">
+        <div class="menu-item-left">
+          <SvgIcon :name="isDark ? 'light' : 'dark'" size="28" />
+          <span class="menu-item-name">深色模式</span>
+        </div>
+        <van-switch :model-value="isDark" size="22px" />
+      </div>
     </div>
 
     <!-- 退出登录 -->
@@ -61,9 +71,10 @@ import { showImagePreview } from "vant";
 import defaultAvatarUrl from "@/assets/logo_melomini.png";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useDarkMode } from "@/hooks/useToggleDarkMode";
+import { useDarkMode, useToggleDarkMode } from "@/hooks/useToggleDarkMode";
 const router = useRouter();
 const isDark = computed(() => useDarkMode());
+const toggleDark = () => useToggleDarkMode();
 const navList = ref([
   {
     icon: "历史",
@@ -74,11 +85,6 @@ const navList = ref([
     icon: "预约",
     name: "我的预约",
     path: "/myAppointment"
-  },
-  {
-    icon: "合同",
-    name: "我的租约",
-    path: "/myAgreement"
   },
   {
     icon: "个人资料",
@@ -182,6 +188,14 @@ onMounted(async () => {
 
 .dark .menu-item-border {
   border-bottom-color: #3a3a3a;
+}
+
+.menu-item-sep {
+  border-top: 1px solid #f0f0f0;
+}
+
+.dark .menu-item-sep {
+  border-top-color: #3a3a3a;
 }
 
 .menu-item-left {

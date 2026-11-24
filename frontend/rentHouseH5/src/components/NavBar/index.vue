@@ -6,24 +6,17 @@
     :title="title"
     :left-arrow="showBack"
     @click-left="onClickLeft"
-    @click-right="onClickRight"
-  >
-    <template #right>
-      <svg-icon class="text-[18px]" :name="useDarkMode() ? 'light' : 'dark'" />
-    </template>
-  </van-nav-bar>
+  />
 </template>
 <script setup lang="ts">
-import { useDarkMode, useToggleDarkMode } from "@/hooks/useToggleDarkMode";
+import { useDarkMode } from "@/hooks/useToggleDarkMode";
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import tabBarRoutes from "@/router/tabBarRoutes";
 import otherRoutes from "@/router/otherRoutes";
 const route = useRoute();
 const router = useRouter();
-const onClickRight = () => {
-  useToggleDarkMode();
-};
+const isDark = computed(() => useDarkMode());
 const onClickLeft = () => {
   const state = history.state;
   if (state && state.position > 0) {
@@ -33,6 +26,11 @@ const onClickLeft = () => {
   }
 };
 const isShowNavBar = computed(() => {
+  // tab 主页面不显示顶部导航条（"栖巢"标题+玻璃背景块），内容直接置顶
+  const tabBarPaths = tabBarRoutes.map(item => item.path);
+  if (tabBarPaths.includes(route.path)) {
+    return false;
+  }
   const showNavBarRoutePathList = [...tabBarRoutes, ...otherRoutes]
     .filter(item => item?.meta?.isShowNavBar)
     .map(item => item.path);
