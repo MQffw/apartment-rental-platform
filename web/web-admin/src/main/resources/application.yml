@@ -17,3 +17,9 @@ spring:
 
 springdoc:
   default-flat-param-object: true
+
+logging:
+  level:
+    # Spring Framework 6.0 对框架 jar（如 RabbitAdmin）解析参数名时的废弃降级警告，无功能影响，静音处理
+    # 根治需升级 Spring Boot 3.2+（Spring Framework 6.1 已移除该降级逻辑）
+    org.springframework.core.LocalVariableTableParameterNameDiscoverer: off

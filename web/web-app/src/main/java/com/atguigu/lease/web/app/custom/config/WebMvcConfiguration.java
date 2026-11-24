@@ -2,6 +2,7 @@ package com.atguigu.lease.web.app.custom.config;
 
 import com.atguigu.lease.common.converter.StringToBaseEnumConverterFactory;
 import com.atguigu.lease.web.app.custom.interceptor.AuthenticationInterceptor;
+import com.atguigu.lease.web.app.custom.interceptor.OptionalAuthenticationInterceptor;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
@@ -19,6 +20,9 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Autowired
     private AuthenticationInterceptor authenticationInterceptor;
+
+    @Autowired
+    private OptionalAuthenticationInterceptor optionalAuthenticationInterceptor;
 
     @Autowired
     private StringToBaseEnumConverterFactory stringToBaseEnumConverterFactory;
@@ -39,5 +43,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                         "/app/notification/**", "/app/user/**", "/app/paymentRecord/**",
                         "/app/post/**", "/app/repair/**",
                         "/app/setPassword", "/app/hasPassword", "/app/info");
+        // 房源详情游客可看：有 token 则解析登录用户（用于记录浏览历史），无 token 匿名放行
+        registry.addInterceptor(this.optionalAuthenticationInterceptor)
+                .addPathPatterns("/app/room/**");
     }
 }

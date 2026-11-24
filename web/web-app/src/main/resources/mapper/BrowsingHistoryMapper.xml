@@ -27,6 +27,7 @@
                  left join apartment_info ai on ri.apartment_id = ai.id and ai.is_deleted = 0
         where bh.is_deleted = 0
           and bh.user_id = #{userId}
+          and bh.browse_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
         order by browse_time desc
     </select>
 

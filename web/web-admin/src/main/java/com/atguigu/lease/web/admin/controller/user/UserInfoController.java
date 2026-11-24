@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +31,9 @@ public class UserInfoController {
     public Result<IPage<UserInfo>> pageUserInfo(@RequestParam long current, @RequestParam long size, UserInfoQueryVo queryVo) {
         Page<UserInfo> page = new Page<>(current, size);
         LambdaQueryWrapper<UserInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(queryVo.getPhone()!=null, UserInfo::getPhone, queryVo.getPhone());
+        queryWrapper.like(StringUtils.hasText(queryVo.getPhone()), UserInfo::getPhone, queryVo.getPhone());
+        queryWrapper.like(StringUtils.hasText(queryVo.getNickname()), UserInfo::getNickname, queryVo.getNickname());
+        queryWrapper.like(StringUtils.hasText(queryVo.getEmail()), UserInfo::getEmail, queryVo.getEmail());
         queryWrapper.eq(queryVo.getStatus()!=null, UserInfo::getStatus, queryVo.getStatus());
         Page<UserInfo> result = service.page(page,queryWrapper);
         return Result.ok(result);
