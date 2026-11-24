@@ -16,6 +16,8 @@ export function getUserManagementInfoList(
     current: params.pageNum,
     size: params.pageSize,
     phone: params.phone,
+    nickname: params.nickname,
+    email: params.email,
     status: params.status,
   })
 }

@@ -30,19 +30,12 @@ const columns: ColumnProps[] = [
   {
     prop: 'nickname',
     label: '昵称',
+    search: { el: 'input', props: { placeholder: '请输入昵称' } },
   },
   {
-    prop: 'avatarUrl',
-    label: '头像',
-    render: ({ row }: { row: UserManagementInfoInterface }) => {
-      return (
-        <el-image
-          style={{ width: '60px', height: '60px' }}
-          src={row.avatarUrl}
-          fit="cover"
-        ></el-image>
-      )
-    },
+    prop: 'email',
+    label: '邮箱',
+    search: { el: 'input', props: { placeholder: '请输入邮箱' } },
   },
   {
     prop: 'phone',

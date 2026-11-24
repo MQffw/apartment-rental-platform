@@ -32,7 +32,7 @@
               <component is="UserFilled"></component>
             </el-icon>
             <template #title>
-              <span>用户管理</span>
+              <span>系统用户</span>
             </template>
           </el-menu-item>
           <el-menu-item index="/system/post">
@@ -158,7 +158,7 @@
           <el-icon>
             <component is="User"></component>
           </el-icon>
-          <span>用户管理</span>
+          <span>租客用户</span>
         </el-menu-item>
       </el-menu>
     </el-scrollbar>

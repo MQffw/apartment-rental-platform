@@ -4,6 +4,10 @@ import { ReqPage } from '@/api/types'
 export interface UserManagementListQueryInterface extends ReqPage {
   // 	用户手机号码
   phone?: number | string
+  // 用户昵称
+  nickname?: string
+  // 用户邮箱
+  email?: string
   status?: UserStatus
 }
 // 用户管理信息
@@ -11,7 +15,7 @@ export interface UserManagementInfoInterface {
   id: number | string
   phone: string
   password: string
-  avatarUrl: string
+  email: string
   nickname: string
   status: UserStatus
 }

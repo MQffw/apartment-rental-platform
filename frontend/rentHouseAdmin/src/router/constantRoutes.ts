@@ -65,7 +65,7 @@ export const staticRoutes: RouteRecordRaw[] = [
         path: '/system/user',
         component: () => import('@/views/system/user/user.vue'),
         meta: {
-          title: '用户管理',
+          title: '系统用户',
           icon: 'UserFilled',
           isHide: false,
           activeMenu: null,
@@ -196,7 +196,7 @@ export const staticRoutes: RouteRecordRaw[] = [
         path: '/userManagement/userManagement',
         component: () => import('@/views/userManagement/userManagement.vue'),
         meta: {
-          title: '用户管理',
+          title: '租客用户',
           icon: 'UserFilled',
           isHide: false,
           activeMenu: null,
