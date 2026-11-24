@@ -9,6 +9,16 @@
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.10-orange)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
+## 文档导航
+
+| 文档 | 用途 |
+|---|---|
+| [AGENTS.md](./AGENTS.md) | 开发者 / AI 编码指南：模块依赖、架构模式、认证流程、前后端技术细节（**唯一维护副本**） |
+| [docs/wiki/](./docs/wiki/README.md) | 模块级深度文档：实体与表结构、各模块 API 与 Service 逻辑、MQ 与定时任务、部署指南 |
+| [docs/wiki/09-运行与部署指南.md](./docs/wiki/09-运行与部署指南.md) | 环境准备、中间件配置、构建启动、常见问题 |
+| [frontend/rentHouseAdmin/README.md](./frontend/rentHouseAdmin/README.md) | 管理端前端自身说明 |
+| [frontend/rentHouseH5/README.md](./frontend/rentHouseH5/README.md) | 移动端前端自身说明 |
+
 ## 特性
 
 - 房源管理：公寓/房间信息维护，支持图片上传
@@ -19,7 +29,7 @@
 - 报修工单：租户在线报修、管理端跟进处理
 - 公告广播：管理端发布系统公告，MQ 异步推送
 - 双端分离：管理员后台 + 用户移动端
-- 安全认证：JWT + 图形验证码/邮箱验证码
+- 安全认证：JWT + 图形验证码/邮箱验证码，token 带 scope 做跨端隔离
 - 数据可视化：Dashboard 统计面板 + ECharts 图表
 
 ## 技术栈
@@ -39,15 +49,19 @@
 
 ## 项目结构
 
-项目采用 Maven 多模块架构，分为以下模块：
+项目采用 Maven 多模块架构：
 
 ```
 lease/                           <- 根模块（统一依赖管理）
-├── model/                       <- 数据模型层（实体类、枚举）
+├── model/                       <- 数据模型层（35 个实体类、14 个枚举）
 ├── common/                      <- 公共层（工具类、配置、统一返回、异常处理、MQ、邮件）
-└── web/                         <- Web 父模块（统一管理 Web 子模块）
-    ├── web-admin/               <- 后台管理端（端口 8080）
-    └── web-app/                 <- 用户移动端（端口 8081）
+├── web/                         <- Web 父模块（统一管理 Web 子模块）
+│   ├── web-admin/               <- 后台管理端（端口 8080，20 个控制器）
+│   └── web-app/                 <- 用户移动端（端口 8081，16 个控制器）
+├── frontend/
+│   ├── rentHouseAdmin/          <- 管理端前端（Vue 3 + Element Plus）
+│   └── rentHouseH5/             <- 用户端 H5（Vue 3 + Vant 4，应用名「栖巢」）
+└── docs/wiki/                   <- 模块级深度文档
 ```
 
 ### 模块说明
@@ -56,7 +70,7 @@ lease/                           <- 根模块（统一依赖管理）
 |---|---|---|
 | **model** | 数据模型层，定义所有数据库实体类和枚举类型 | JPA 注解 |
 | **common** | 公共组件层，统一返回结果、异常处理、工具类、MQ 配置、邮件服务 | JWT, Redis, MinIO, RabbitMQ, Spring Mail |
-| **web-admin** | 后台管理系统，管理员操作入口 | Spring Security |
+| **web-admin** | 后台管理系统，管理员操作入口 | Spring MVC + 自定义拦截器 |
 | **web-app** | 用户移动端，租客使用入口 | JWT 认证 |
 
 ### 架构图
@@ -84,7 +98,7 @@ lease/                           <- 根模块（统一依赖管理）
 - **房源管理**：公寓/房间的增删改查、上架/下架
 - **租约管理**：租约的创建、查询、状态流转（签约、取消、到期、续签）
 - **预约管理**：查看看房预约、更新预约状态
-- **报修管理**：查看报修工单、按状态/公寓筛选、处理状态流转（待处理/处理中/已完成/已关闭），状态变更自动通知租户
+- **报修管理**：查看报修工单、按状态/公寓筛选、状态流转（待处理/处理中/已完成/已关闭），状态变更自动通知租户
 - **帖子管理**：查看帖子列表、屏蔽/恢复/删除帖子、帖子数据统计
 - **评论管理**：查看评论列表、删除违规评论
 - **公告发送**：面向全体用户或指定用户发布系统公告，通过 MQ 异步投递
@@ -97,7 +111,7 @@ lease/                           <- 根模块（统一依赖管理）
 
 ### 用户移动端 (web-app)
 
-- **登录认证**：邮箱验证码登录，JWT 鉴权，新用户自动注册
+- **登录认证**：邮箱验证码登录，支持密码登录，新用户自动注册
 - **房源浏览**：分页浏览房间列表、查看房间详情、多维度筛选搜索
 - **公寓浏览**：分页浏览公寓列表、查看公寓详情
 - **我的房间**：查看当前租约关联的房间信息、租约状态展示
@@ -133,90 +147,6 @@ lease/                           <- 根模块（统一依赖管理）
 | 热门排行 | Sorted Set `post:hot:rank` |
 | 通知未读数 | 缓存未读计数 |
 | 邮箱验证码 | 验证码存储，可配置长度/TTL/重发间隔 |
-
-## 前端项目
-
-### 管理端前端 (rentHouseAdmin)
-
-- **技术栈**：Vue 3 + TypeScript + Vite 4 + Element Plus + Pinia + ECharts 5
-- **API 连接**：开发环境代理 `/admin` 请求到 `http://localhost:8080`
-
-#### 常用命令
-
-```bash
-npm install          # 安装依赖
-npm run dev          # 启动开发服务器
-npm run build        # 生产构建
-npm run lint         # ESLint 检查并自动修复
-npm run format       # Prettier 格式化
-```
-
-#### 目录结构
-
-```
-src/
-├── api/            # 按领域组织的 API 接口
-├── components/     # 全局组件（ProTable, SearchForm 等）
-├── enums/          # 业务枚举和常量映射
-├── hooks/          # 组合式函数
-├── layouts/        # 布局壳（SideBar, NavBar, TabsBar, Main）
-├── router/         # 路由配置
-├── store/          # Pinia 状态（user, settings, tabsBar）
-├── utils/          # 工具（HTTP 客户端、缓存、事件总线）
-└── views/          # 页面组件
-```
-
-#### 架构要点
-
-- **状态管理**：Pinia，三个 store 模块 -- `user`（token + 用户信息，持久化）、`settings`（主题/侧边栏）、`tabsBar`（标签页导航）
-- **路由**：Hash 模式，静态路由定义在 `src/router/constantRoutes.ts`，导航守卫校验 token
-- **HTTP 客户端**：Axios 封装在 `src/utils/http/`，请求拦截器自动附加 `access-token`，响应拦截器处理过期码（305/601/602）
-- **ProTable 组件**：核心表格组件，封装了搜索、分页、列配置、数据请求
-- **主题系统**：支持暗黑模式和动态主色调，通过 CSS 自定义属性实现
-
-### 用户端前端 (rentHouseH5)
-
-- **技术栈**：Vue 3 + TypeScript + Vite 4 + Vant 4 + Pinia + Tailwind CSS + Less
-- **API 连接**：开发环境代理 `/app` 请求到 `http://localhost:8081`
-- **应用名称**：桔巢
-
-#### 常用命令
-
-```bash
-npm install          # 安装依赖
-npm run dev          # 启动开发服务器
-npm run build        # 生产构建
-npm run type-check   # TypeScript 类型检查
-npm run lint         # ESLint 检查并自动修复
-```
-
-#### 目录结构
-
-```
-src/
-├── api/            # API 接口（search/ 核心业务, user/ 认证, community/ 社区）
-├── components/     # 自定义组件（RoomCard, ApartmentCard, SearchBar, SvgIcon 等）
-├── enums/          # 业务枚举和请求码常量
-├── hooks/          # 组合式函数
-├── icons/          # 170+ 自定义 SVG 图标
-├── layout/         # 主布局（NavBar + keep-alive router-view + Tabbar）
-├── router/         # 路由配置（tabBarRoutes + otherRoutes）
-├── store/          # Pinia 状态（user, cachedView, darkMode）
-├── styles/         # 全局样式（Less + Tailwind，暗黑模式变量）
-├── utils/          # 工具（HTTP 客户端、token 管理）
-└── views/          # 页面组件
-```
-
-#### 架构要点
-
-- **移动端适配**：px-to-viewport PostCSS 插件（375px 设计稿基准），Vant 4 移动端组件库
-- **状态管理**：Pinia，三个 store -- `user`（token + 用户信息，持久化）、`cachedView`（keep-alive 缓存管理）、`darkMode`（暗黑模式）
-- **路由**：Hash 模式，底部 TabBar 5 个主 tab（找房、圈子、我的房间、消息、个人中心）+ 多个子页面
-- **HTTP 客户端**：Axios 封装在 `src/utils/http/`，请求拦截器附加 `access-token`，响应拦截器处理过期码（305/501/601/602）
-- **无限滚动**：`PullDownRefreshContainer` 组件基于 IntersectionObserver 实现下拉刷新 + 上拉加载
-- **暗黑模式**：CSS 自定义属性 + Vant ConfigProvider 主题切换 + 系统偏好检测
-- **keep-alive 缓存**：组件 `name` 需与路由 `name` 一致，`meta.noCache: true` 的页面不缓存
-- **统一导航栏**：5 个 Tab 页面共享全局 NavBar（标题"桔巢" + 暗色模式切换）
 
 ## 数据库设计
 
@@ -286,51 +216,45 @@ src/
 ### 安装步骤
 
 1. **克隆项目**
+
    ```bash
    git clone https://github.com/yourusername/lease-management-system.git
    cd lease-management-system
    ```
 
-2. **创建数据库**
+2. **创建空库**（表结构由 Flyway 自动迁移，无需手工导入）
+
    ```sql
-   CREATE DATABASE lease_management DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE DATABASE lease DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
 
-3. **导入表结构**
-   ```bash
-   mysql -u username -p lease_management < sql/lease_management.sql
-   ```
+3. **配置密钥**
+   复制仓库根目录 `.env.properties.example` 为 `.env.properties`，按模板填入真实值（该文件已被 `.gitignore` 排除）：
 
-4. **配置应用**
-   修改配置文件中的数据库、Redis、RabbitMQ、MinIO、邮件等连接信息：
-   - 后台管理端：`web/web-admin/src/main/resources/application.yml`
-   - 用户移动端：`web/web-app/src/main/resources/application.yml`
+   - `DB_PASSWORD` — MySQL 密码（`application-dev.yml` 中无默认值，缺失会导致启动失败）
+   - `RABBITMQ_USER`（默认 `admin`）/ `RABBITMQ_PASS` — RabbitMQ 账号
+   - `MINIO_ACCESS_KEY`（默认 `minioadmin`）/ `MINIO_SECRET_KEY` — 对象存储
+   - 邮件、JWT 等其他敏感项的键名以 `.env.properties.example` 为准
+
+   两个 web 模块通过 `spring.config.import` 读取该文件；数据库、Redis、RabbitMQ、MinIO 地址等在 `application-dev.yml` / `application-prod.yml` 中调整。
+
+4. **初始化表结构**
+   无需手工执行 SQL。`web-admin` 内置 Flyway，启动时自动按 `src/main/resources/db/migration` 下的 `V1__init_schema` → `V2__init_dict` → `V3__init_admin_and_demo` 顺序建表并写入字典与演示数据（`baseline-version=3`，已有旧库会跳过前三版）。`web-app` 不引入 Flyway，仅连接同一库。
 
 5. **编译运行后端**
+
    ```bash
-   # 根目录编译打包
    mvn clean install
 
-   # 启动后台管理端（端口 8080）
-   cd web/web-admin
-   mvn spring-boot:run
-
-   # 启动用户移动端（端口 8081）
-   cd web/web-app
-   mvn spring-boot:run
+   cd web/web-admin && mvn spring-boot:run    # 管理端，8080（首次启动执行迁移）
+   cd web/web-app   && mvn spring-boot:run    # 用户端，8081
    ```
 
 6. **运行前端**
-   ```bash
-   # 管理端前端
-   cd rentHouseAdmin
-   npm install
-   npm run dev
 
-   # 用户端前端
-   cd rentHouseH5
-   npm install
-   npm run dev
+   ```bash
+   cd frontend/rentHouseAdmin && npm install && npm run dev
+   cd frontend/rentHouseH5    && npm install && npm run dev
    ```
 
 ### 访问地址
@@ -344,60 +268,9 @@ src/
 | 用户移动端前端 | http://localhost:5174 | 用户端前端（Vite 开发服务器） |
 | 用户端 API 文档 | http://localhost:8081/doc.html | Knife4j 文档 |
 
-## API 认证说明
+## 认证与核心枚举
 
-### 后台管理端 (web-admin)
-
-1. 获取图形验证码：`GET /admin/login/captcha`
-2. 登录获取 Token：`POST /admin/login`（请求头携带验证码 key）
-3. 后续请求在 Header 中携带 `access-token: <JWT>`
-
-### 用户移动端 (web-app)
-
-1. 获取邮箱验证码：`GET /app/login/getCode?email=xxx`
-2. 验证码登录获取 Token：`POST /app/login`
-3. 后续请求在 Header 中携带 `access-token: <JWT>`
-
-### 前端请求配置
-
-前后端通过 RESTful API 通信，所有请求 Header 携带 `access-token: <JWT>`：
-
-| 前端 | 后端模块 | API 前缀 | 认证方式 |
-|---|---|---|---|
-| rentHouseAdmin | web-admin | `/admin/` | 图形验证码 + 用户名密码 |
-| rentHouseH5 | web-app | `/app/` | 邮箱验证码 |
-
-**响应格式**统一为 `{ code: number, message: string, data: T }`，前端响应拦截器根据 `code` 判断成功/失败/登录过期。
-
-## 核心枚举
-
-### 房源相关
-
-- `ItemType` - 关联类型：APARTMENT(1) 公寓, ROOM(2) 房间
-- `BaseStatus` - 基础状态：ENABLE(1) 启用, DISABLE(0) 禁用
-- `ReleaseStatus` - 发布状态：RELEASED(1) 已发布, NOT_RELEASED(0) 未发布
-
-### 租约相关
-
-- `LeaseStatus` - 租约状态：SIGNING(1) 签约中, SIGNED(2) 已签约, CANCELED(3) 已取消, EXPIRED(4) 已到期, WITHDRAWING(5) 退租中, WITHDRAWN(6) 已退租, RENEWING(7) 续签中
-- `LeaseSourceType` - 租约来源：NEW(1) 新签, RENEW(2) 续签
-
-### 预约相关
-
-- `AppointmentStatus` - 预约状态：WAITING(1) 待看房, CANCELED(2) 已取消, VIEWED(3) 已看房
-
-### 社区相关
-
-- `PostStatus` - 帖子状态：NORMAL(1) 正常, REVIEWING(2) 审核中, BLOCKED(3) 已屏蔽
-- `NotificationType` - 通知类型：LEASE_EXPIRY(1), APPOINTMENT_CHANGE(2), NEW_APPOINTMENT(3), LEASE_CHANGE(4), PAYMENT_REMINDER(5), POST_LIKE(6), POST_COMMENT(7)
-
-### 报修相关
-
-- `RepairStatus` - 报修状态：PENDING(0) 待处理, PROCESSING(1) 处理中, COMPLETED(2) 已完成, CLOSED(3) 已关闭
-
-### 用户相关
-
-- `SystemUserType` - 系统用户类型：ADMIN(0) 管理员, COMMON(1) 普通用户
+认证流程（JWT + `access-token` 请求头，跨端 scope 隔离）、核心枚举取值、前后端通信约定，统一见 [AGENTS.md](./AGENTS.md)。
 
 ## 贡献
 
